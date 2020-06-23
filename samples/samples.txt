@@ -1,0 +1,14 @@
+
+
+create type Address (
+name String,
+id number
+);
+
+Create Table Student (
+Id number,
+Name string,
+DateOfBirthEpoch number,
+HomeAddress Address,
+WorkAddress Address
+)
