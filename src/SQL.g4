@@ -194,7 +194,7 @@ else_stmt:
 ;
 
 inline_condition_stmt:
-    expr_if QuesM expr ORM expr ';'*
+    expr_if QuesM (expr | expr_for_and_operator) ORM (expr | expr_for_and_operator) ';'*
     |expr_if QuesM OPEN_PAR* inline_condition_stmt CLOSE_PAR* ORM OPEN_PAR* inline_condition_stmt CLOSE_PAR* ';'*
 
 ;

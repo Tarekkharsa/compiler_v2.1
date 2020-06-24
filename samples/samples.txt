@@ -12,3 +12,27 @@ DateOfBirthEpoch number,
 HomeAddress Address,
 WorkAddress Address
 )
+
+
+func(){
+
+for(var i =0 ; i < 5; i++){}
+
+for(var j =0 ; j < 5; j++){}
+
+for(var user : users){}
+
+if(x == 5){}
+
+do{}while(x == 5);
+
+    switch(x){
+    case 'd':{}
+    break;
+    case 'f':{}
+    break;
+    default:{}
+
+    }
+
+}

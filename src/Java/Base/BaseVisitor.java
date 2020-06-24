@@ -523,17 +523,17 @@ public class BaseVisitor extends SQLBaseVisitor {
 
     @Override
     public Expr_while visitExpr_while(SQLParser.Expr_whileContext ctx) {
-        Scope parentScope = Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1);
+//        Scope parentScope = Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1);
         Expr_while expr_while = new Expr_while();
 
         if (ctx.literal_value() != null) {
             LiteralValue literalValue = visitLiteral_value(ctx.literal_value());
-            Symbol symbol = new Symbol();
-            if (literalValue.getStringValue() != null) symbol.setName(literalValue.getStringValue());
-            if (literalValue.getNumericalValue() != null) symbol.setName(literalValue.getNumericalValue());
-
-            symbol.setIsParam(false);
-            symbol.setScope(parentScope);
+//            Symbol symbol = new Symbol();
+//            if (literalValue.getStringValue() != null) symbol.setName(literalValue.getStringValue());
+//            if (literalValue.getNumericalValue() != null) symbol.setName(literalValue.getNumericalValue());
+//
+//            symbol.setIsParam(false);
+//            symbol.setScope(parentScope);
 
             expr_while.setLiteralValue(literalValue);
         }
@@ -541,10 +541,10 @@ public class BaseVisitor extends SQLBaseVisitor {
         if (ctx.any_name() != null) {
             List<AnyName> anyNames = new ArrayList<>();
             for (int i = 0; i < ctx.any_name().size(); i++) {
-                Symbol symbol = new Symbol();
-                symbol.setName(visitAny_name(ctx.any_name(i)).getIDENTIFIER());
-                symbol.setIsParam(false);
-                symbol.setScope(parentScope);
+//                Symbol symbol = new Symbol();
+//                symbol.setName(visitAny_name(ctx.any_name(i)).getIDENTIFIER());
+//                symbol.setIsParam(false);
+//                symbol.setScope(parentScope);
 
                 anyNames.add(visitAny_name(ctx.any_name(i)));
             }
@@ -636,20 +636,19 @@ public class BaseVisitor extends SQLBaseVisitor {
         return expr_while;
     }
 
-
     @Override
     public Expr_if visitExpr_if(SQLParser.Expr_ifContext ctx) {
-        Scope parentScope = Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1);
+//        Scope parentScope = Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1);
         Expr_if expr_if = new Expr_if();
 
         if (ctx.literal_value() != null) {
             LiteralValue literalValue = visitLiteral_value(ctx.literal_value());
-            Symbol symbol = new Symbol();
-            if (literalValue.getStringValue() != null) symbol.setName(literalValue.getStringValue());
-            if (literalValue.getNumericalValue() != null) symbol.setName(literalValue.getNumericalValue());
-
-            symbol.setIsParam(false);
-            symbol.setScope(parentScope);
+//            Symbol symbol = new Symbol();
+//            if (literalValue.getStringValue() != null) symbol.setName(literalValue.getStringValue());
+//            if (literalValue.getNumericalValue() != null) symbol.setName(literalValue.getNumericalValue());
+//
+//            symbol.setIsParam(false);
+//            symbol.setScope(parentScope);
 
             expr_if.setLiteralValue(literalValue);
         }
@@ -657,10 +656,10 @@ public class BaseVisitor extends SQLBaseVisitor {
         if (ctx.any_name() != null) {
             List<AnyName> anyNames = new ArrayList<>();
             for (int i = 0; i < ctx.any_name().size(); i++) {
-                Symbol symbol = new Symbol();
-                symbol.setName(visitAny_name(ctx.any_name(i)).getIDENTIFIER());
-                symbol.setIsParam(false);
-                symbol.setScope(parentScope);
+//                Symbol symbol = new Symbol();
+//                symbol.setName(visitAny_name(ctx.any_name(i)).getIDENTIFIER());
+//                symbol.setIsParam(false);
+//                symbol.setScope(parentScope);
 
                 anyNames.add(visitAny_name(ctx.any_name(i)));
             }
@@ -1299,6 +1298,10 @@ public class BaseVisitor extends SQLBaseVisitor {
         }
         if (ctx.body() != null) {
             functionDeclaration.setBody(visitBody(ctx.body()));
+
+            for (Scope scope : Main.symbolTable.getScopes()) {
+                System.out.println("scope: "+scope.getId());
+            }
         }
 
         return functionDeclaration;
@@ -1974,7 +1977,7 @@ public class BaseVisitor extends SQLBaseVisitor {
             List<If_stmt> if_stmts = new ArrayList<>();
             for (int i = 0; i < ctx.if_stmt().size(); i++) {
                 Scope ifScope = new Scope();
-                ifScope.setId("If_" + i);
+                ifScope.setId("Parent_" + parentScope.getId() + "_If_" + i);
                 ifScope.setParent(parentScope);
                 Main.symbolTable.addScope(ifScope);
 
@@ -1989,7 +1992,7 @@ public class BaseVisitor extends SQLBaseVisitor {
             List<While_stmt> while_stmts = new ArrayList<>();
             for (int i = 0; i < ctx.while_stmt().size(); i++) {
                 Scope whileScope = new Scope();
-                whileScope.setId("While_" + i);
+                whileScope.setId("Parent_" + parentScope.getId() + "_While_" + i);
                 whileScope.setParent(parentScope);
                 Main.symbolTable.addScope(whileScope);
 
@@ -2001,6 +2004,11 @@ public class BaseVisitor extends SQLBaseVisitor {
         if (ctx.for_stmt() != null) {
             List<For_stmt> for_stmts = new ArrayList<>();
             for (int i = 0; i < ctx.for_stmt().size(); i++) {
+                Scope forScope = new Scope();
+                forScope.setId("Parent_" + parentScope.getId() + "_For_" + i);
+                forScope.setParent(parentScope);
+                Main.symbolTable.addScope(forScope);
+
                 for_stmts.add(visitFor_stmt(ctx.for_stmt(i)));
             }
             body.setfor_stmt(for_stmts);
@@ -2009,10 +2017,30 @@ public class BaseVisitor extends SQLBaseVisitor {
         if (ctx.do_while_stmt() != null) {
             List<Do_while_stmt> do_while_stmts = new ArrayList<>();
             for (int i = 0; i < ctx.do_while_stmt().size(); i++) {
+                Scope forScope = new Scope();
+                forScope.setId("Parent_" + parentScope.getId() + "_DoWhile_" + i);
+                forScope.setParent(parentScope);
+                Main.symbolTable.addScope(forScope);
+
                 do_while_stmts.add(visitDo_while_stmt(ctx.do_while_stmt(i)));
             }
             body.setdo_while_stmt(do_while_stmts);
         }
+
+        // Switch_stmt
+        if (ctx.switch_stmt() != null) {
+            List<Switch_stmt> switch_stmts = new ArrayList<>();
+            for (int i = 0; i < ctx.switch_stmt().size(); i++) {
+                Scope forScope = new Scope();
+                forScope.setId("Parent_" + parentScope.getId() + "_Switch_" + i);
+                forScope.setParent(parentScope);
+                Main.symbolTable.addScope(forScope);
+
+                switch_stmts.add(visitSwitch_stmt(ctx.switch_stmt(i)));
+            }
+            body.setSwitch_stmt(switch_stmts);
+        }
+
         // def_print_stmt
         if (ctx.def_print_stmt() != null) {
             List<Def_print_stmt> def_print_stmts = new ArrayList<>();
@@ -2037,15 +2065,6 @@ public class BaseVisitor extends SQLBaseVisitor {
                 inline_condition_stmts.add(visitInline_condition_stmt(ctx.inline_condition_stmt(i)));
             }
             body.setInline_condition_stmt(inline_condition_stmts);
-        }
-
-        // Switch_stmt
-        if (ctx.switch_stmt() != null) {
-            List<Switch_stmt> switch_stmts = new ArrayList<>();
-            for (int i = 0; i < ctx.switch_stmt().size(); i++) {
-                switch_stmts.add(visitSwitch_stmt(ctx.switch_stmt(i)));
-            }
-            body.setSwitch_stmt(switch_stmts);
         }
 
         // sql_statment
@@ -2270,7 +2289,7 @@ public class BaseVisitor extends SQLBaseVisitor {
     // visit_if
     @Override
     public If_stmt visitIf_stmt(SQLParser.If_stmtContext ctx) {
-        // declare all object in if
+        Scope parentScope = Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1);
 
         If_stmt if_stmt = new If_stmt();
         List<Else_if> else_ifList = new ArrayList<>();
@@ -2284,11 +2303,21 @@ public class BaseVisitor extends SQLBaseVisitor {
         }
         if (ctx.else_if_stmt() != null) {
             for (int i = 0; i < ctx.else_if_stmt().size(); i++) {
+                Scope elseIfScope = new Scope();
+                elseIfScope.setId("Parent_" + parentScope.getId() + "_ElseIf_" + i);
+                elseIfScope.setParent(parentScope);
+                Main.symbolTable.addScope(elseIfScope);
+
                 else_ifList.add(visitElse_if_stmt(ctx.else_if_stmt(i)));
             }
             if_stmt.setElse_ifList(else_ifList);
         }
         if (ctx.else_stmt() != null) {
+            Scope elseScope = new Scope();
+            elseScope.setId("Parent_" + parentScope.getId() + "_Else");
+            elseScope.setParent(parentScope);
+            Main.symbolTable.addScope(elseScope);
+
             if_stmt.setElsee(visitElse_stmt(ctx.else_stmt()));
         }
         if (ctx.expr_if() != null) {
@@ -2385,17 +2414,75 @@ public class BaseVisitor extends SQLBaseVisitor {
             for_rule.setExpr_for_and_operators(exprs);
         }
 
+        if (ctx.K_VAR() != null) { // if Var is exist then we must store new var in symbolTable
+            for_rule.setK_var(ctx.K_VAR().getSymbol().getText());
+
+            Scope parentScope = Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1);
+            List<Expr_for_and_operator> list = for_rule.getExpr_for_and_operators().get(0).getExpr_for_and_operators();
+
+            Symbol varForSymbol = new Symbol();
+            Type varType = new Type();
+
+            for (int i = 0; i < list.size(); i++) {
+
+                if (i == 0) { // 0 is index of (name) of symbol
+                    if (list.get(i).getAnyName() != null)
+                        varForSymbol.setName(list.get(i).getAnyName().getIDENTIFIER());
+                    else if (list.get(i).getLiteralValue() != null) {
+                        if (list.get(i).getLiteralValue().getStringValue() != null)
+                            varForSymbol.setName(list.get(i).getLiteralValue().getStringValue());
+                        else if (list.get(i).getLiteralValue().getNumericalValue() != null)
+                            varForSymbol.setName(list.get(i).getLiteralValue().getNullValue());
+
+                    }
+                }
+
+                if (i == 1) { // 1 is index of (type) of symbol
+
+                    if (list.get(i).getLiteralValue() != null) {
+
+                        if (list.get(i).getLiteralValue().getStringValue() != null)
+                            varType.setName(Type.STRING_CONST);
+                        else if (list.get(i).getLiteralValue().getNumericalValue() != null)
+                            varType.setName(Type.NUMBER_CONST);
+                    }
+                }
+
+                varForSymbol.setType(varType);
+                varForSymbol.setScope(parentScope);
+                varForSymbol.setIsParam(true);
+                parentScope.addSymbol(varForSymbol.getName(), varForSymbol);
+            }
+
+            System.out.println("varName: "+varForSymbol.getName()+" parentScope:"+varForSymbol.getScope().getId()
+                    + " type:"+ varForSymbol.getType().getName());
+        }
+
         return for_rule;
     }
 
     @Override
     public Foreach_rule visitForeach_rule(SQLParser.Foreach_ruleContext ctx) {
+        Scope parentScope = Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1);
         Foreach_rule foreach_rule = new Foreach_rule();
+
+        Symbol varForSymbol = new Symbol();
 
         if (ctx.any_name() != null) {
             List<AnyName> anyNames = new ArrayList<>();
             for (int i = 0; i < ctx.any_name().size(); i++) {
-                anyNames.add(visitAny_name(ctx.any_name(i)));
+                AnyName anyName = visitAny_name(ctx.any_name(i));
+                anyNames.add(anyName);
+
+                if (i == 0){ // first anyName is a var must be stored in symbolTable
+                    varForSymbol.setName(anyName.getIDENTIFIER());
+                    varForSymbol.setIsParam(true);
+                    varForSymbol.setScope(parentScope);
+                    parentScope.addSymbol(varForSymbol.getName(),varForSymbol);
+
+                    System.out.println("varName: "+varForSymbol.getName()
+                            +" parentScope:"+varForSymbol.getScope().getId());
+                }
             }
             foreach_rule.setAnyNames(anyNames);
         }
@@ -2482,6 +2569,8 @@ public class BaseVisitor extends SQLBaseVisitor {
 
     @Override
     public Switch_stmt visitSwitch_stmt(SQLParser.Switch_stmtContext ctx) {
+        Scope parentScope = Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1);
+
         Switch_stmt switch_stmt = new Switch_stmt();
         List<AnyName> anyNames = new ArrayList<>();
         List<SignedNumber> signedNumbers = new ArrayList<>();
@@ -2502,6 +2591,11 @@ public class BaseVisitor extends SQLBaseVisitor {
         if (ctx.body() != null) {
             List<Body> bodies = new ArrayList<>();
             for (int i = 0; i < ctx.body().size(); i++) {
+                Scope forScope = new Scope();
+                forScope.setId(parentScope.getId() + "_Case_" + i);
+                forScope.setParent(parentScope);
+                Main.symbolTable.addScope(forScope);
+
                 bodies.add(visitBody(ctx.body(i)));
             }
             switch_stmt.setBody_swich(bodies);
