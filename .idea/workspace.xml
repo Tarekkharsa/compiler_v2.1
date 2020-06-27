@@ -4,9 +4,26 @@
     <list default="true" id="57616b6f-dc0e-4c54-9253-48e762344409" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/AST_getting_started/Java/Base/BaseVisitor.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/AST_getting_started/Java/Base/BaseVisitor.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/AST_getting_started/SQL.g4" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/AST_getting_started/SQL.g4" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/samples/samples.txt" beforeDir="false" afterPath="$PROJECT_DIR$/samples/samples.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Java/AST/Function/If_stmt/If_stmt.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Java/AST/Function/If_stmt/If_stmt.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Java/AST/Function/Loop/While_stmt.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Java/AST/Function/Loop/While_stmt.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Java/AST/Visitor/BaseASTVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Java/AST/Visitor/BaseASTVisitor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Java/Base/BaseVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Java/Base/BaseVisitor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Java/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Java/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Java/SymbolTable/Scope.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Java/SymbolTable/Scope.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/SQL.g4" beforeDir="false" afterPath="$PROJECT_DIR$/src/SQL.g4" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/generated/SQL.interp" beforeDir="false" afterPath="$PROJECT_DIR$/src/generated/SQL.interp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/generated/SQL.tokens" beforeDir="false" afterPath="$PROJECT_DIR$/src/generated/SQL.tokens" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/generated/SQLBaseListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/generated/SQLBaseListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/generated/SQLBaseVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/generated/SQLBaseVisitor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/generated/SQLLexer.interp" beforeDir="false" afterPath="$PROJECT_DIR$/src/generated/SQLLexer.interp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/generated/SQLLexer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/generated/SQLLexer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/generated/SQLLexer.tokens" beforeDir="false" afterPath="$PROJECT_DIR$/src/generated/SQLLexer.tokens" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/generated/SQLListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/generated/SQLListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/generated/SQLParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/generated/SQLParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/generated/SQLVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/generated/SQLVisitor.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -59,7 +76,7 @@
     <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1577045352358" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_package_manager_path" value="npm" />
-    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
@@ -205,6 +222,9 @@
       <workItem from="1592840166319" duration="7777000" />
       <workItem from="1592921517354" duration="2430000" />
       <workItem from="1592997316230" duration="1161000" />
+      <workItem from="1593245208132" duration="1561000" />
+      <workItem from="1593246819457" duration="479000" />
+      <workItem from="1593247350433" duration="19626000" />
     </task>
     <servers />
   </component>

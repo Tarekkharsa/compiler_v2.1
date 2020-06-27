@@ -149,89 +149,17 @@ public interface SQLVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitReturn_stmt(SQLParser.Return_stmtContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link SQLParser#array_stmt}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitArray_stmt(SQLParser.Array_stmtContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link SQLParser#switch_stmt}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitSwitch_stmt(SQLParser.Switch_stmtContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link SQLParser#higher_order_stmt}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitHigher_order_stmt(SQLParser.Higher_order_stmtContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link SQLParser#func_argument_list}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitFunc_argument_list(SQLParser.Func_argument_listContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link SQLParser#def_function_default_value}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitDef_function_default_value(SQLParser.Def_function_default_valueContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link SQLParser#json_stmt}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitJson_stmt(SQLParser.Json_stmtContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link SQLParser#json_attribute}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitJson_attribute(SQLParser.Json_attributeContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link SQLParser#json_obj}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitJson_obj(SQLParser.Json_objContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link SQLParser#json_array}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitJson_array(SQLParser.Json_arrayContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link SQLParser#call_json}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitCall_json(SQLParser.Call_jsonContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link SQLParser#edit_json}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitEdit_json(SQLParser.Edit_jsonContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link SQLParser#alter_table_stmt}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitAlter_table_stmt(SQLParser.Alter_table_stmtContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link SQLParser#alter_table_add_constraint}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitAlter_table_add_constraint(SQLParser.Alter_table_add_constraintContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link SQLParser#alter_table_add}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitAlter_table_add(SQLParser.Alter_table_addContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link SQLParser#create_table_stmt}.
 	 * @param ctx the parse tree
@@ -245,29 +173,47 @@ public interface SQLVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCreate_type_stmt(SQLParser.Create_type_stmtContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link SQLParser#delete_stmt}.
+	 * Visit a parse tree produced by {@link SQLParser#create_aggr_func}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitDelete_stmt(SQLParser.Delete_stmtContext ctx);
+	T visitCreate_aggr_func(SQLParser.Create_aggr_funcContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link SQLParser#drop_table_stmt}.
+	 * Visit a parse tree produced by {@link SQLParser#jar_path}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitDrop_table_stmt(SQLParser.Drop_table_stmtContext ctx);
+	T visitJar_path(SQLParser.Jar_pathContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#class_name}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitClass_name(SQLParser.Class_nameContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#method_name}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMethod_name(SQLParser.Method_nameContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#return_type}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitReturn_type(SQLParser.Return_typeContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#array_aggr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitArray_aggr(SQLParser.Array_aggrContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link SQLParser#factored_select_stmt}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitFactored_select_stmt(SQLParser.Factored_select_stmtContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link SQLParser#insert_stmt}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitInsert_stmt(SQLParser.Insert_stmtContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link SQLParser#select_stmt}.
 	 * @param ctx the parse tree
@@ -280,12 +226,6 @@ public interface SQLVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitSelect_or_values(SQLParser.Select_or_valuesContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link SQLParser#update_stmt}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitUpdate_stmt(SQLParser.Update_stmtContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link SQLParser#column_def}.
 	 * @param ctx the parse tree

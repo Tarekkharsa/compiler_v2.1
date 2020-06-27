@@ -31,8 +31,9 @@
 grammar SQL;
 
 parse
- : ( def_all
-  | sql_stmt_list
+ : (
+   def_all
+  |sql_stmt_list
   | error )* EOF
  ;
 
@@ -48,28 +49,30 @@ sql_stmt_list
  ;
 
 sql_stmt
- : ( K_EXPLAIN ( K_QUERY K_PLAN )? )? ( alter_table_stmt
+ : ( K_EXPLAIN ( K_QUERY K_PLAN )? )? (
+//                                       alter_table_stmt
 //                                      | analyze_stmt
 //                                      | attach_stmt
 //                                      | begin_stmt
 //                                      | commit_stmt
 //                                      | compound_select_stmt
 //                                      | create_index_stmt
-                                      | create_table_stmt
-                                      | create_type_stmt
+                                       create_type_stmt
+                                       |create_table_stmt
+                                       |create_aggr_func
 //                                      | create_type
 //                                      | create_trigger_stmt
 //                                      | create_view_stmt
 //                                      | create_virtual_table_stmt
-                                      | delete_stmt
+//                                      | delete_stmt
 //                                      | delete_stmt_limited
 //                                      | detach_stmt
 //                                      | drop_index_stmt
-                                      | drop_table_stmt
+//                                      | drop_table_stmt
 //                                      | drop_trigger_stmt
 //                                      | drop_view_stmt
                                       | factored_select_stmt
-                                      | insert_stmt
+//                                      | insert_stmt
 //                                      | pragma_stmt
 //                                      | reindex_stmt
 //                                      | release_stmt
@@ -77,7 +80,7 @@ sql_stmt
 //                                      | savepoint_stmt
 //                                      | simple_select_stmt
 //                                      | select_stmt
-                                      | update_stmt
+//                                      | update_stmt
 //                                      | update_stmt_limited
 //                                      | vacuum_stmt
                                        )
@@ -85,8 +88,8 @@ sql_stmt
 
 def_all :
     def_function
-    | def_function_default_value
-    | higher_order_stmt
+//    | def_function_default_value
+//    | higher_order_stmt
 //   | var_init
 //   | var_operator
    | var_get_func
@@ -100,7 +103,7 @@ def_all :
 //   | higher_order_stmt
    | func_argument_list
 //   | def_function_default_value
-    | json_stmt
+//    | json_stmt
 //   | array_stmt
    ;
 
@@ -112,8 +115,12 @@ def_function: // this is func params list
  ;
 
 body:
-    (var_init | def_print_stmt | if_stmt | while_stmt | do_while_stmt | for_stmt  | array_stmt |
-     switch_stmt | inline_condition_stmt | json_stmt ';'? | sql_stmt_list ';' | var_get_func | func_argument_list | call_json | edit_json
+    (var_init | def_print_stmt | if_stmt | while_stmt | do_while_stmt | for_stmt
+//    | array_stmt
+    | switch_stmt | inline_condition_stmt
+//     | json_stmt ';'?
+     | sql_stmt_list ';' | var_get_func | func_argument_list
+//      |  call_json | edit_json
      | var_operator)*
     return_stmt?
  ;
@@ -138,9 +145,8 @@ def_print_stmt
    : K_VAR? K_PRINT OPEN_PAR print_body CLOSE_PAR ';'
 ;
 
-print_body
-    :  (call_json | expr_print )*
-;
+
+print_body: expr_print* ;
 //
 //expr
 // : literal_value
@@ -194,7 +200,7 @@ else_stmt:
 ;
 
 inline_condition_stmt:
-    expr_if QuesM expr ORM expr ';'*
+    expr_if QuesM (expr | expr_for_and_operator) ORM (expr | expr_for_and_operator) ';'*
     |expr_if QuesM OPEN_PAR* inline_condition_stmt CLOSE_PAR* ORM OPEN_PAR* inline_condition_stmt CLOSE_PAR* ';'*
 
 ;
@@ -233,12 +239,12 @@ return_stmt :
     K_RETURN (expr | var_operator | inline_condition_stmt) ';'
 ;
 
-array_stmt
-  : K_VAR? ( ('['']' any_name) | (any_name '['']') ) ';'*
-   ('=' OPEN_B (any_name | signed_number) (',' (any_name | signed_number) )* CLOSE_B ';'*
-   |'='  '[' (any_name | signed_number) (',' (any_name | signed_number) )* ']' ';'*
-   |'=' sql_stmt_list )?
-;
+//array_stmt
+//  : K_VAR? ( ('['']' any_name) | (any_name '['']') ) ';'*
+//   ('=' OPEN_B (any_name | signed_number) (',' (any_name | signed_number) )* CLOSE_B ';'*
+//   |'='  '[' (any_name | signed_number) (',' (any_name | signed_number) )* ']' ';'*
+//   |'=' sql_stmt_list )?
+//;
 
 switch_stmt
   : K_SWITCH OPEN_PAR any_name CLOSE_PAR
@@ -249,57 +255,57 @@ switch_stmt
     CLOSE_B
 ;
 
-higher_order_stmt
-  : (K_VAR IDENTIFIER '=')? IDENTIFIER
-    OPEN_PAR
-    IDENTIFIER /*(',' IDENTIFIER)*/* ',' K_FUNCTION
-       OPEN_PAR (IDENTIFIER (','IDENTIFIER)*)? CLOSE_PAR
-       OPEN_B
-        K_RETURN expr ';'
-       CLOSE_B
-    CLOSE_PAR ';'
-;
+//higher_order_stmt
+//  : (K_VAR IDENTIFIER '=')? IDENTIFIER
+//    OPEN_PAR
+//    IDENTIFIER /*(',' IDENTIFIER)*/* ',' K_FUNCTION
+//       OPEN_PAR (IDENTIFIER (','IDENTIFIER)*)? CLOSE_PAR
+//       OPEN_B
+//        K_RETURN expr ';'
+//       CLOSE_B
+//    CLOSE_PAR ';'
+//;
 
 func_argument_list
   : (K_FUNCTION | any_name) OPEN_PAR (any_name (',' any_name)*)? CLOSE_PAR ';'
 ;
 
-def_function_default_value:
-    K_VAR? (K_FUNCTION | any_name) OPEN_PAR ( K_VAR expr(',' K_VAR expr)* )? CLOSE_PAR
-    OPEN_B
-    body
-    CLOSE_B
- ;
+//def_function_default_value:
+//    K_VAR? (K_FUNCTION | any_name) OPEN_PAR ( K_VAR expr(',' K_VAR expr)* )? CLOSE_PAR
+//    OPEN_B
+//    body
+//    CLOSE_B
+// ;
 
-json_stmt
-  : K_VAR? any_name ASSIGN
-    OPEN_B
-    ( json_attribute | json_obj | json_array )*
-    CLOSE_B ';'
-;
-
-json_attribute
-  : IDENTIFIER ORM expr ','?
-;
-
-json_obj
-  : (IDENTIFIER ORM)? OPEN_B (json_attribute | json_obj | json_array)* CLOSE_B ','?
-;
-
-json_array
-  : IDENTIFIER ORM
-    OPEN_ARRAY
-    (json_obj | any_name (',' any_name)* | signed_number (',' signed_number)*)*
-    CLOSE_ARRAY ','?
-;
-
-call_json
-    : any_name ('.' any_name)* ';'*
-;
-
-edit_json
-    : any_name (DOT any_name)* ASSIGN (signed_number | expr) SCOL*
-;
+//json_stmt
+//  : K_VAR? any_name ASSIGN
+//    OPEN_B
+//    ( json_attribute | json_obj | json_array )*
+//    CLOSE_B ';'
+//;
+//
+//json_attribute
+//  : IDENTIFIER ORM expr ','?
+//;
+//
+//json_obj
+//  : (IDENTIFIER ORM)? OPEN_B (json_attribute | json_obj | json_array)* CLOSE_B ','?
+//;
+//
+//json_array
+//  : IDENTIFIER ORM
+//    OPEN_ARRAY
+//    (json_obj | any_name (',' any_name)* | signed_number (',' signed_number)*)*
+//    CLOSE_ARRAY ','?
+//;
+//
+//call_json
+//    : any_name ('.' any_name)* ';'*
+//;
+//
+//edit_json
+//    : any_name (DOT any_name)* ASSIGN (signed_number | expr) SCOL*
+//;
 //
 //expr
 // : literal_value
@@ -324,24 +330,24 @@ edit_json
 //  | expr ( '=' | '=+' | '=-' | '-=' | '+=' | '*=' | '/=' ) expr
 //  | '(' expr ')'
 //  ;
-
-alter_table_stmt
- : K_ALTER K_TABLE K_ONLY? ( database_name '.' )? source_table_name
-   ( K_RENAME K_TO new_table_name
-   | alter_table_add
-   | alter_table_add_constraint
-   | K_ADD K_COLUMN? column_def
-   )
-   K_ENABLE? (unknown)?
- ;
-
-alter_table_add_constraint
- : K_ADD K_CONSTRAINT any_name table_constraint
- ;
-
-alter_table_add
- : K_ADD table_constraint
- ;
+//
+//alter_table_stmt
+// : K_ALTER K_TABLE K_ONLY? ( database_name '.' )? source_table_name
+//   ( K_RENAME K_TO new_table_name
+//   | alter_table_add
+//   | alter_table_add_constraint
+//   | K_ADD K_COLUMN? column_def
+//   )
+//   K_ENABLE? (unknown)?
+// ;
+//
+//alter_table_add_constraint
+// : K_ADD K_CONSTRAINT any_name table_constraint
+// ;
+//
+//alter_table_add
+// : K_ADD table_constraint
+// ;
 //
 //analyze_stmt
 // : K_ANALYZE ( database_name | table_or_index_name | database_name '.' table_or_index_name )?
@@ -378,7 +384,8 @@ create_table_stmt
    ( database_name '.' )? table_name
 //   ( '(' column_def ( ',' table_constraint | ',' column_def )* ')' ( K_WITHOUT IDENTIFIER )?
    ( '(' column_def ( ',' table_constraint | ',' column_def )* ')'
-   | K_AS select_stmt
+   (K_TYPE ASSIGN (K_JSON | K_CSV) ',' 'path' ASSIGN any_name)?
+//   | K_AS select_stmt
 //   ) (unknown)?
    )
  ;
@@ -388,9 +395,34 @@ create_type_stmt
  : K_CREATE  K_TYPE ( K_IF K_NOT K_EXISTS )?
    any_name
 //   ( '(' column_def ( ',' table_constraint | ',' column_def )* ')' ( K_WITHOUT IDENTIFIER )?
-   ( '(' column_def ( ',' table_constraint | ',' column_def )* ')'
+   ( '(' column_def (    ',' column_def )* ')'
    )
  ;
+
+create_aggr_func
+ : K_CREATE  K_AGGREGATION_FUNCTION any_name
+   ( '(' jar_path ',' class_name ',' method_name ',' return_type ',' array_aggr ')' )
+ ;
+
+jar_path:
+ any_name
+ ;
+
+class_name:
+ any_name
+ ;
+
+method_name:
+ any_name
+ ;
+
+return_type:
+ any_name
+  ;
+
+array_aggr:
+'[' any_name (',' any_name)* ']'
+;
 
 
 //create_type_stmt
@@ -427,12 +459,12 @@ create_type_stmt
 //   ( database_name '.' )? table_name
 //   K_USING module_name ( '(' module_argument ( ',' module_argument )* ')' )?
 // ;
-
-delete_stmt
-// : with_clause? K_DELETE K_FROM qualified_table_name
- :  K_DELETE K_FROM qualified_table_name
-   ( K_WHERE expr )?
- ;
+//
+//delete_stmt
+//// : with_clause? K_DELETE K_FROM qualified_table_name
+// :  K_DELETE K_FROM qualified_table_name
+//   ( K_WHERE expr )?
+// ;
 //
 //delete_stmt_limited
 // : with_clause? K_DELETE K_FROM qualified_table_name
@@ -449,10 +481,10 @@ delete_stmt
 //drop_index_stmt
 // : K_DROP K_INDEX ( K_IF K_EXISTS )? ( database_name '.' )? index_name
 // ;
-
-drop_table_stmt
- : K_DROP K_TABLE ( K_IF K_EXISTS )? ( database_name '.' )? table_name
- ;
+//
+//drop_table_stmt
+// : K_DROP K_TABLE ( K_IF K_EXISTS )? ( database_name '.' )? table_name
+// ;
 //
 //drop_trigger_stmt
 // : K_DROP K_TRIGGER ( K_IF K_EXISTS )? ( database_name '.' )? trigger_name
@@ -470,21 +502,21 @@ factored_select_stmt
    ( K_LIMIT expr ( ( K_OFFSET | ',' ) expr )? )?
  ;
 
-insert_stmt
-// : with_clause? ( K_INSERT
-//                | K_REPLACE
-//                | K_INSERT K_OR K_REPLACE
-//                | K_INSERT K_OR K_ROLLBACK
-//                | K_INSERT K_OR K_ABORT
-//                | K_INSERT K_OR K_FAIL
-//                | K_INSERT K_OR K_IGNORE ) K_INTO
-                :   K_INSERT  K_INTO
-   ( database_name '.' )? table_name ( '(' column_name ( ',' column_name )* ')' )?
-   ( K_VALUES '(' expr ( ',' expr )* ')' ( ',' '(' expr ( ',' expr )* ')' )*
-   | select_stmt
-   | K_DEFAULT K_VALUES
-   )
- ;
+//insert_stmt
+//// : with_clause? ( K_INSERT
+////                | K_REPLACE
+////                | K_INSERT K_OR K_REPLACE
+////                | K_INSERT K_OR K_ROLLBACK
+////                | K_INSERT K_OR K_ABORT
+////                | K_INSERT K_OR K_FAIL
+////                | K_INSERT K_OR K_IGNORE ) K_INTO
+//                :   K_INSERT  K_INTO
+//   ( database_name '.' )? table_name ( '(' column_name ( ',' column_name )* ')' )?
+//   ( K_VALUES '(' expr ( ',' expr )* ')' ( ',' '(' expr ( ',' expr )* ')' )*
+//   | select_stmt
+//   | K_DEFAULT K_VALUES
+//   )
+// ;
 //
 //pragma_stmt
 // : K_PRAGMA ( database_name '.' )? pragma_name ( '=' pragma_value
@@ -531,16 +563,16 @@ select_or_values
  | K_VALUES '(' expr ( ',' expr )* ')' ( ',' '(' expr ( ',' expr )* ')' )*
  ;
 
-update_stmt
-// : with_clause? K_UPDATE ( K_OR K_ROLLBACK
-// :  K_UPDATE ( K_OR K_ROLLBACK
-//                         | K_OR K_ABORT
-//                         | K_OR K_REPLACE
-//                         | K_OR K_FAIL
-//                         | K_OR K_IGNORE )? qualified_table_name
-                         :  K_UPDATE  qualified_table_name
-   K_SET column_name '=' expr ( ',' column_name '=' expr )* ( K_WHERE expr )?
- ;
+//update_stmt
+//// : with_clause? K_UPDATE ( K_OR K_ROLLBACK
+//// :  K_UPDATE ( K_OR K_ROLLBACK
+////                         | K_OR K_ABORT
+////                         | K_OR K_REPLACE
+////                         | K_OR K_FAIL
+////                         | K_OR K_IGNORE )? qualified_table_name
+//                         :  K_UPDATE  qualified_table_name
+//   K_SET column_name '=' expr ( ',' column_name '=' expr )* ( K_WHERE expr )?
+// ;
 //
 //update_stmt_limited
 // : with_clause? K_UPDATE ( K_OR K_ROLLBACK
@@ -677,12 +709,12 @@ expr_while
   | expr_while K_OR expr_while
   | expr_while PIPE2 expr_while
   | expr_while AND expr_while
-    | any_name OPEN_ARRAY expr CLOSE_ARRAY (expr_while call_json)?
+//    | any_name OPEN_ARRAY expr CLOSE_ARRAY (expr_while call_json)?
     | any_name OPEN_ARRAY expr CLOSE_ARRAY expr_while any_name OPEN_ARRAY expr CLOSE_ARRAY
     | any_name OPEN_ARRAY expr CLOSE_ARRAY expr_while (any_name | signed_number)
-    | call_json expr_while (any_name | signed_number)
-    | call_json (expr_while call_json)?
-    | call_json expr_while any_name OPEN_ARRAY expr CLOSE_ARRAY
+//    | call_json expr_while (any_name | signed_number)
+//    | call_json (expr_while call_json)?
+//    | call_json expr_while any_name OPEN_ARRAY expr CLOSE_ARRAY
   | OPEN_PAR expr_while CLOSE_PAR
   | K_CAST OPEN_PAR expr_while K_AS type_name CLOSE_PAR
   ;
@@ -698,12 +730,12 @@ expr_while
   | expr_if K_OR expr_if
   | expr_if PIPE2 expr_if
   | expr_if AND expr_if
-  | any_name OPEN_ARRAY expr CLOSE_ARRAY (expr_if call_json)?
+//  | any_name OPEN_ARRAY expr CLOSE_ARRAY (expr_if call_json)?
   | any_name OPEN_ARRAY expr CLOSE_ARRAY expr_if any_name OPEN_ARRAY expr CLOSE_ARRAY
   | any_name OPEN_ARRAY expr CLOSE_ARRAY expr_if (any_name | signed_number)
-  | call_json expr_if (any_name | signed_number)
-  | call_json (expr_if call_json)?
-  | call_json expr_if any_name OPEN_ARRAY expr CLOSE_ARRAY
+//  | call_json expr_if (any_name | signed_number)
+//  | call_json (expr_if call_json)?
+//  | call_json expr_if any_name OPEN_ARRAY expr CLOSE_ARRAY
   | OPEN_ARRAY any_name CLOSE_ARRAY
   | OPEN_PAR expr_if CLOSE_PAR
   | K_CAST OPEN_PAR expr_if K_AS type_name CLOSE_PAR
@@ -1317,9 +1349,10 @@ K_WITH : W I T H;
 K_WITHOUT : W I T H O U T;
 K_VAR : V A R;
 K_TYPE : T Y P E;
-//K_NUMBER : N U M B E R;
-//K_STRING : S T R I N G;
-//K_BOOLEAN : B O O L E A N;
+K_CSV : C S V;
+K_JSON : J S O N;
+K_AGGREGATION_FUNCTION : A G G R E G A T I O N '_' F U N C T I O N;
+
 
 IDENTIFIER
  : '"' (~'"' | '""')* '"'

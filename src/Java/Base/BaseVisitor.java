@@ -6,9 +6,7 @@ import Java.AST.Expr.Expr_for_and_operator;
 import Java.AST.Expr.Expr_if;
 import Java.AST.Expr.Expr_while;
 import Java.AST.Function.*;
-import Java.AST.Function.Array.Array_stmt;
 import Java.AST.Function.If_stmt.*;
-import Java.AST.Function.Json.*;
 import Java.AST.Function.Loop.*;
 import Java.AST.Function.Print.Def_print_stmt;
 import Java.AST.Function.Print.Print_body;
@@ -19,9 +17,7 @@ import Java.AST.QueryStmt.ColumnConstraints.ColumnForeignKey;
 import Java.AST.QueryStmt.ColumnConstraints.ColumnNotNull;
 import Java.AST.QueryStmt.ColumnConstraints.ColumnNull;
 import Java.AST.QueryStmt.ColumnConstraints.ColumnPrimaryKey;
-import Java.AST.QueryStmt.DeleteStatement.DeleteStmt;
 import Java.AST.QueryStmt.DeleteStatement.QualifiedTableName;
-import Java.AST.QueryStmt.InsertStatement.InsertStmt;
 import Java.AST.QueryStmt.SelectOrSubQuery.ResultColumn;
 import Java.AST.QueryStmt.SelectOrSubQuery.SelectOrValues;
 import Java.AST.QueryStmt.SelectOrSubQuery.TableOrSubQuery;
@@ -119,21 +115,21 @@ public class BaseVisitor extends SQLBaseVisitor {
         if (ctx.create_table_stmt() != null) {
             s.setCreateStmt(visitCreate_table_stmt(ctx.create_table_stmt()));
         }
-        if (ctx.alter_table_stmt() != null) {
-            s.setAlterTableStmt(visitAlter_table_stmt(ctx.alter_table_stmt()));
-        }
-        if (ctx.insert_stmt() != null) {
-            s.setInsertStmt(visitInsert_stmt(ctx.insert_stmt()));
-        }
-        if (ctx.drop_table_stmt() != null) {
-            s.setDropStmt(visitDrop_table_stmt(ctx.drop_table_stmt()));
-        }
-        if (ctx.delete_stmt() != null) {
-            s.setDeleteStmt(visitDelete_stmt(ctx.delete_stmt()));
-        }
-        if (ctx.update_stmt() != null) {
-            s.setUpdateStmt(visitUpdate_stmt(ctx.update_stmt()));
-        }
+//        if (ctx.alter_table_stmt() != null) {
+//            s.setAlterTableStmt(visitAlter_table_stmt(ctx.alter_table_stmt()));
+//        }
+//        if (ctx.insert_stmt() != null) {
+//            s.setInsertStmt(visitInsert_stmt(ctx.insert_stmt()));
+//        }
+//        if (ctx.drop_table_stmt() != null) {
+//            s.setDropStmt(visitDrop_table_stmt(ctx.drop_table_stmt()));
+//        }
+//        if (ctx.delete_stmt() != null) {
+//            s.setDeleteStmt(visitDelete_stmt(ctx.delete_stmt()));
+//        }
+//        if (ctx.update_stmt() != null) {
+//            s.setUpdateStmt(visitUpdate_stmt(ctx.update_stmt()));
+//        }
         if (ctx.create_type_stmt() != null) {
             s.setCreateType(visitCreate_type_stmt(ctx.create_type_stmt()));
         }
@@ -373,8 +369,6 @@ public class BaseVisitor extends SQLBaseVisitor {
      */
     @Override
     public Expr visitExpr(SQLParser.ExprContext ctx) {
-
-
         Expr expr = new Expr();
         if (ctx.literal_value() != null) {
             expr.setLiteralValue(visitLiteral_value(ctx.literal_value()));
@@ -568,13 +562,13 @@ public class BaseVisitor extends SQLBaseVisitor {
         }
 
         //call_json
-        if (ctx.call_json() != null) {
-            List<Call_json> call_jsons = new ArrayList<>();
-            for (int i = 0; i < ctx.call_json().size(); i++) {
-                call_jsons.add(visitCall_json(ctx.call_json().get(i)));
-            }
-            expr_while.setCall_jsons(call_jsons);
-        }
+//        if (ctx.call_json() != null) {
+//            List<Call_json> call_jsons = new ArrayList<>();
+//            for (int i = 0; i < ctx.call_json().size(); i++) {
+//                call_jsons.add(visitCall_json(ctx.call_json().get(i)));
+//            }
+//            expr_while.setCall_jsons(call_jsons);
+//        }
 
         if (ctx.signed_number() != null) {
             expr_while.setSignedNumber(visitSigned_number(ctx.signed_number()));
@@ -638,17 +632,10 @@ public class BaseVisitor extends SQLBaseVisitor {
 
     @Override
     public Expr_if visitExpr_if(SQLParser.Expr_ifContext ctx) {
-//        Scope parentScope = Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1);
         Expr_if expr_if = new Expr_if();
 
         if (ctx.literal_value() != null) {
             LiteralValue literalValue = visitLiteral_value(ctx.literal_value());
-//            Symbol symbol = new Symbol();
-//            if (literalValue.getStringValue() != null) symbol.setName(literalValue.getStringValue());
-//            if (literalValue.getNumericalValue() != null) symbol.setName(literalValue.getNumericalValue());
-//
-//            symbol.setIsParam(false);
-//            symbol.setScope(parentScope);
 
             expr_if.setLiteralValue(literalValue);
         }
@@ -656,10 +643,6 @@ public class BaseVisitor extends SQLBaseVisitor {
         if (ctx.any_name() != null) {
             List<AnyName> anyNames = new ArrayList<>();
             for (int i = 0; i < ctx.any_name().size(); i++) {
-//                Symbol symbol = new Symbol();
-//                symbol.setName(visitAny_name(ctx.any_name(i)).getIDENTIFIER());
-//                symbol.setIsParam(false);
-//                symbol.setScope(parentScope);
 
                 anyNames.add(visitAny_name(ctx.any_name(i)));
             }
@@ -669,27 +652,28 @@ public class BaseVisitor extends SQLBaseVisitor {
         if (ctx.expr_if() != null) {
             List<Expr_if> expr_ifs = new ArrayList<>();
             for (int i = 0; i < ctx.expr_if().size(); i++) {
-                expr_ifs.add(visitExpr_if(ctx.expr_if(i)));
+                expr_ifs.add(visitExpr_if(ctx.expr_if().get(i)));
             }
             expr_if.setExpr_ifs(expr_ifs);
         }
 
+
         if (ctx.expr() != null) {
             List<Expr> exprs = new ArrayList<>();
             for (int i = 0; i < ctx.expr().size(); i++) {
-                exprs.add(visitExpr(ctx.expr(i)));
+                exprs.add(visitExpr(ctx.expr().get(i)));
             }
             expr_if.setExpr(exprs);
         }
 
         //call_json
-        if (ctx.call_json() != null) {
-            List<Call_json> call_jsons = new ArrayList<>();
-            for (int i = 0; i < ctx.call_json().size(); i++) {
-                call_jsons.add(visitCall_json(ctx.call_json().get(i)));
-            }
-            expr_if.setCall_jsons(call_jsons);
-        }
+//        if (ctx.call_json() != null) {
+//            List<Call_json> call_jsons = new ArrayList<>();
+//            for (int i = 0; i < ctx.call_json().size(); i++) {
+//                call_jsons.add(visitCall_json(ctx.call_json().get(i)));
+//            }
+//            expr_if.setCall_jsons(call_jsons);
+//        }
 
         if (ctx.signed_number() != null) {
             expr_if.setSignedNumber(visitSigned_number(ctx.signed_number()));
@@ -790,10 +774,7 @@ public class BaseVisitor extends SQLBaseVisitor {
     @Override
     public Expr_Print visitExpr_print(SQLParser.Expr_printContext ctx) {
         Expr_Print expr_print = new Expr_Print();
-
-
         if (ctx.literal_value() != null) {
-
             expr_print.setLiteralValue(visitLiteral_value(ctx.literal_value()));
         }
         if (ctx.unary_operator() != null) {
@@ -1013,7 +994,11 @@ public class BaseVisitor extends SQLBaseVisitor {
             tableOrSubQuery.setTableAlias(ctx.table_alias().any_name().getText());
             tableAliasSymbol.setType(symbolType);
 
-            Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1).addSymbol(tableAliasSymbol.getScope().getId(), tableAliasSymbol);
+            Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1)
+                    .addSymbol(tableAliasSymbol.getScope().getId(), tableAliasSymbol);
+
+            Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1)
+                    .setSymbol(tableAliasSymbol);
         }
 
         if (ctx.table_or_subquery() != null) {
@@ -1187,16 +1172,16 @@ public class BaseVisitor extends SQLBaseVisitor {
         if (ctx.def_function() != null) {
             defAllObject.setFunctionDeclarations(visitDef_function(ctx.def_function()));
         }
-        if (ctx.def_function_default_value() != null) {
-            defAllObject.setDef_function_default_value(visitDef_function_default_value(ctx.def_function_default_value()));
-
-        }
-        if (ctx.higher_order_stmt() != null) {
-            defAllObject.setHigherOrderStmt(visitHigher_order_stmt(ctx.higher_order_stmt()));
-        }
-        if (ctx.json_stmt() != null) {
-            defAllObject.setJson_stmt(visitJson_stmt(ctx.json_stmt()));
-        }
+//        if (ctx.def_function_default_value() != null) {
+//            defAllObject.setDef_function_default_value(visitDef_function_default_value(ctx.def_function_default_value()));
+//
+//        }
+//        if (ctx.higher_order_stmt() != null) {
+//            defAllObject.setHigherOrderStmt(visitHigher_order_stmt(ctx.higher_order_stmt()));
+//        }
+//        if (ctx.json_stmt() != null) {
+//            defAllObject.setJson_stmt(visitJson_stmt(ctx.json_stmt()));
+//        }
         if (ctx.func_argument_list() != null) {
             defAllObject.setFuncArgumentList(visitFunc_argument_list(ctx.func_argument_list()));
         }
@@ -1209,63 +1194,63 @@ public class BaseVisitor extends SQLBaseVisitor {
     }
 
 
-    @Override
-    public DefFunctionDefaultValue visitDef_function_default_value(SQLParser.Def_function_default_valueContext ctx) {
-        DefFunctionDefaultValue defFunctionDefaultValue = new DefFunctionDefaultValue();
-        if (ctx.K_VAR() != null) {
-            List<String> vars = new ArrayList<>();
-            for (int i = 0; i < ctx.K_VAR().size(); i++) {
-                vars.add(ctx.K_VAR(i).getSymbol().getText());
-            }
-            defFunctionDefaultValue.setK_var(vars);
-        }
-        if (ctx.K_FUNCTION() != null) {
-            defFunctionDefaultValue.setK_function(ctx.K_FUNCTION().getSymbol().getText());
-        }
-        if (ctx.any_name() != null) {
-            defFunctionDefaultValue.setAnyName(visitAny_name(ctx.any_name()));
-        }
-        if (ctx.body() != null) {
-            defFunctionDefaultValue.setBody(visitBody(ctx.body()));
-        }
-        if (ctx.expr() != null) {
-            List<Expr> exprs = new ArrayList<>();
-            for (int i = 0; i < ctx.expr().size(); i++) {
-                exprs.add(visitExpr(ctx.expr(i)));
-            }
-            defFunctionDefaultValue.setExprList(exprs);
-        }
-        return defFunctionDefaultValue;
-    }
+//    @Override
+//    public DefFunctionDefaultValue visitDef_function_default_value(SQLParser.Def_function_default_valueContext ctx) {
+//        DefFunctionDefaultValue defFunctionDefaultValue = new DefFunctionDefaultValue();
+//        if (ctx.K_VAR() != null) {
+//            List<String> vars = new ArrayList<>();
+//            for (int i = 0; i < ctx.K_VAR().size(); i++) {
+//                vars.add(ctx.K_VAR(i).getSymbol().getText());
+//            }
+//            defFunctionDefaultValue.setK_var(vars);
+//        }
+//        if (ctx.K_FUNCTION() != null) {
+//            defFunctionDefaultValue.setK_function(ctx.K_FUNCTION().getSymbol().getText());
+//        }
+//        if (ctx.any_name() != null) {
+//            defFunctionDefaultValue.setAnyName(visitAny_name(ctx.any_name()));
+//        }
+//        if (ctx.body() != null) {
+//            defFunctionDefaultValue.setBody(visitBody(ctx.body()));
+//        }
+//        if (ctx.expr() != null) {
+//            List<Expr> exprs = new ArrayList<>();
+//            for (int i = 0; i < ctx.expr().size(); i++) {
+//                exprs.add(visitExpr(ctx.expr(i)));
+//            }
+//            defFunctionDefaultValue.setExprList(exprs);
+//        }
+//        return defFunctionDefaultValue;
+//    }
 
-    @Override
-    public HigherOrderStmt visitHigher_order_stmt(SQLParser.Higher_order_stmtContext ctx) {
-        HigherOrderStmt higherOrderStmt = new HigherOrderStmt();
-        if (ctx.K_FUNCTION() != null) {
-            higherOrderStmt.setK_function(ctx.K_FUNCTION().getSymbol().getText());
-        }
-        if (ctx.K_RETURN() != null) {
-            higherOrderStmt.setK_return(ctx.K_RETURN().getSymbol().getText());
-        }
-        if (ctx.K_VAR() != null) {
-
-            higherOrderStmt.setK_var(ctx.K_VAR().getSymbol().getText());
-        }
-        if (ctx.ASSIGN() != null) {
-            higherOrderStmt.setAssign(ctx.ASSIGN().getSymbol().getText());
-        }
-        if (ctx.IDENTIFIER() != null) {
-            List<String> identifier = new ArrayList<>();
-            for (int i = 0; i < ctx.IDENTIFIER().size(); i++) {
-                identifier.add(ctx.IDENTIFIER().get(i).getSymbol().getText());
-            }
-            higherOrderStmt.setIdentifier(identifier);
-        }
-        if (ctx.expr() != null) {
-            higherOrderStmt.setExpr(visitExpr(ctx.expr()));
-        }
-        return higherOrderStmt;
-    }
+//    @Override
+//    public HigherOrderStmt visitHigher_order_stmt(SQLParser.Higher_order_stmtContext ctx) {
+//        HigherOrderStmt higherOrderStmt = new HigherOrderStmt();
+//        if (ctx.K_FUNCTION() != null) {
+//            higherOrderStmt.setK_function(ctx.K_FUNCTION().getSymbol().getText());
+//        }
+//        if (ctx.K_RETURN() != null) {
+//            higherOrderStmt.setK_return(ctx.K_RETURN().getSymbol().getText());
+//        }
+//        if (ctx.K_VAR() != null) {
+//
+//            higherOrderStmt.setK_var(ctx.K_VAR().getSymbol().getText());
+//        }
+//        if (ctx.ASSIGN() != null) {
+//            higherOrderStmt.setAssign(ctx.ASSIGN().getSymbol().getText());
+//        }
+//        if (ctx.IDENTIFIER() != null) {
+//            List<String> identifier = new ArrayList<>();
+//            for (int i = 0; i < ctx.IDENTIFIER().size(); i++) {
+//                identifier.add(ctx.IDENTIFIER().get(i).getSymbol().getText());
+//            }
+//            higherOrderStmt.setIdentifier(identifier);
+//        }
+//        if (ctx.expr() != null) {
+//            higherOrderStmt.setExpr(visitExpr(ctx.expr()));
+//        }
+//        return higherOrderStmt;
+//    }
 
     @Override
     public FunctionDeclaration visitDef_function(SQLParser.Def_functionContext ctx) {
@@ -1291,6 +1276,7 @@ public class BaseVisitor extends SQLBaseVisitor {
                     symbol.setIsParam(true);
                     Scope currentScope = Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1);
                     currentScope.addSymbol(paramName, symbol);
+                    currentScope.setSymbol(symbol);
                 }
                 // end
             }
@@ -1400,12 +1386,12 @@ public class BaseVisitor extends SQLBaseVisitor {
             }
             createStmt.setTableConstraints(tableConstraints);
         }
-        if (ctx.K_AS() != null) {
-            createStmt.setAS(ctx.K_AS().getSymbol().getText());
-        }
-        if (ctx.select_stmt() != null) {
-            createStmt.setSelectStmt(visitSelect_stmt(ctx.select_stmt()));
-        }
+//        if (ctx.K_AS() != null) {
+//            createStmt.setAS(ctx.K_AS().getSymbol().getText());
+//        }
+//        if (ctx.select_stmt() != null) {
+//            createStmt.setSelectStmt(visitSelect_stmt(ctx.select_stmt()));
+//        }
         if (ctx.table_name() != null) {
             createStmt.setTableName(ctx.table_name().any_name().getText());
         }
@@ -1422,72 +1408,72 @@ public class BaseVisitor extends SQLBaseVisitor {
         return createStmt;
     }
 
-    @Override
-    public AlterTableStmt visitAlter_table_stmt(SQLParser.Alter_table_stmtContext ctx) {
-        AlterTableStmt alterTableStmt = new AlterTableStmt();
-        if (ctx.source_table_name() != null) {
-            alterTableStmt.setAlterTableName(ctx.source_table_name().any_name().getText());
-        }
-
-        if (ctx.K_RENAME() != null) {
-            alterTableStmt.setRenameTo(ctx.K_RENAME().getSymbol().getText() + "" + ctx.K_TO().getSymbol().getText());
-        }
-        if (ctx.new_table_name() != null) {
-            alterTableStmt.setNewTableName(ctx.new_table_name().any_name().getText());
-        }
-        if (ctx.column_def() != null) {
-            alterTableStmt.setColumnDef(visitColumn_def(ctx.column_def()));
-        }
-        if (ctx.alter_table_add() != null) {
-            alterTableStmt.setAlterTableAdd(visitAlter_table_add(ctx.alter_table_add()));
-        }
-        if (ctx.alter_table_add_constraint() != null) {
-            alterTableStmt.setAlterTableAddConstraint(visitAlter_table_add_constraint(ctx.alter_table_add_constraint()));
-        }
-        if (ctx.database_name() != null) {
-            alterTableStmt.setDataBaseName(ctx.database_name().any_name().getText());
-        }
-
-        return alterTableStmt;
-    }
+//    @Override
+//    public AlterTableStmt visitAlter_table_stmt(SQLParser.Alter_table_stmtContext ctx) {
+//        AlterTableStmt alterTableStmt = new AlterTableStmt();
+//        if (ctx.source_table_name() != null) {
+//            alterTableStmt.setAlterTableName(ctx.source_table_name().any_name().getText());
+//        }
+//
+//        if (ctx.K_RENAME() != null) {
+//            alterTableStmt.setRenameTo(ctx.K_RENAME().getSymbol().getText() + "" + ctx.K_TO().getSymbol().getText());
+//        }
+//        if (ctx.new_table_name() != null) {
+//            alterTableStmt.setNewTableName(ctx.new_table_name().any_name().getText());
+//        }
+//        if (ctx.column_def() != null) {
+//            alterTableStmt.setColumnDef(visitColumn_def(ctx.column_def()));
+//        }
+//        if (ctx.alter_table_add() != null) {
+//            alterTableStmt.setAlterTableAdd(visitAlter_table_add(ctx.alter_table_add()));
+//        }
+//        if (ctx.alter_table_add_constraint() != null) {
+//            alterTableStmt.setAlterTableAddConstraint(visitAlter_table_add_constraint(ctx.alter_table_add_constraint()));
+//        }
+//        if (ctx.database_name() != null) {
+//            alterTableStmt.setDataBaseName(ctx.database_name().any_name().getText());
+//        }
+//
+//        return alterTableStmt;
+//    }
 
     @Override
     public Object visitSource_table_name(SQLParser.Source_table_nameContext ctx) {
         return super.visitSource_table_name(ctx);
     }
 
-    @Override
-    public AlterTableAdd visitAlter_table_add(SQLParser.Alter_table_addContext ctx) {
-        AlterTableAdd alterTableAdd = new AlterTableAdd();
-        if (ctx.table_constraint() != null) {
-
-            alterTableAdd.setTableConstraint(visitTable_constraint(ctx.table_constraint()));
-        }
-        if (ctx.K_ADD() != null) {
-            alterTableAdd.setAdd(ctx.K_ADD().getSymbol().getText());
-        }
-        return alterTableAdd;
-    }
-
-    @Override
-    public AlterTableAddConstraint visitAlter_table_add_constraint(SQLParser.Alter_table_add_constraintContext ctx) {
-        AlterTableAddConstraint alterTableAddConstraint = new AlterTableAddConstraint();
-        if (ctx.table_constraint() != null) {
-            alterTableAddConstraint.setTableConstraint(visitTable_constraint(ctx.table_constraint()));
-
-        }
-        if (ctx.any_name() != null) {
-
-            alterTableAddConstraint.setName(ctx.any_name().getText());
-        }
-        if (ctx.K_ADD() != null) {
-            alterTableAddConstraint.setAdd(ctx.K_ADD().getSymbol().getText());
-        }
-        if (ctx.K_CONSTRAINT() != null) {
-            alterTableAddConstraint.setConstraint(ctx.K_CONSTRAINT().getSymbol().getText());
-        }
-        return alterTableAddConstraint;
-    }
+//    @Override
+//    public AlterTableAdd visitAlter_table_add(SQLParser.Alter_table_addContext ctx) {
+//        AlterTableAdd alterTableAdd = new AlterTableAdd();
+//        if (ctx.table_constraint() != null) {
+//
+//            alterTableAdd.setTableConstraint(visitTable_constraint(ctx.table_constraint()));
+//        }
+//        if (ctx.K_ADD() != null) {
+//            alterTableAdd.setAdd(ctx.K_ADD().getSymbol().getText());
+//        }
+//        return alterTableAdd;
+//    }
+//
+//    @Override
+//    public AlterTableAddConstraint visitAlter_table_add_constraint(SQLParser.Alter_table_add_constraintContext ctx) {
+//        AlterTableAddConstraint alterTableAddConstraint = new AlterTableAddConstraint();
+//        if (ctx.table_constraint() != null) {
+//            alterTableAddConstraint.setTableConstraint(visitTable_constraint(ctx.table_constraint()));
+//
+//        }
+//        if (ctx.any_name() != null) {
+//
+//            alterTableAddConstraint.setName(ctx.any_name().getText());
+//        }
+//        if (ctx.K_ADD() != null) {
+//            alterTableAddConstraint.setAdd(ctx.K_ADD().getSymbol().getText());
+//        }
+//        if (ctx.K_CONSTRAINT() != null) {
+//            alterTableAddConstraint.setConstraint(ctx.K_CONSTRAINT().getSymbol().getText());
+//        }
+//        return alterTableAddConstraint;
+//    }
 
     @Override
     public TableConstraint visitTable_constraint(SQLParser.Table_constraintContext ctx) {
@@ -1786,67 +1772,67 @@ public class BaseVisitor extends SQLBaseVisitor {
         return columnNull;
     }
 
-    @Override
-    public InsertStmt visitInsert_stmt(SQLParser.Insert_stmtContext ctx) {
-        InsertStmt insertStmt = new InsertStmt();
-        if (ctx.database_name() != null) {
-            insertStmt.setDatabaseName(ctx.database_name().any_name().getText());
-        }
-        if (ctx.table_name() != null) {
-            insertStmt.setTableName(ctx.table_name().any_name().getText());
-        }
-        if (ctx.column_name() != null) {
-            List<String> columName = new ArrayList<>();
-            for (int i = 0; i < ctx.column_name().size(); i++) {
-                columName.add(ctx.column_name(i).any_name().getText());
-            }
-            insertStmt.setColumnName(columName);
-        }
-        if (ctx.expr() != null) {
-            List<Expr> exprs = new ArrayList<>();
-            for (int i = 0; i < ctx.expr().size(); i++) {
-                exprs.add(visitExpr(ctx.expr(i)));
-            }
-            insertStmt.setExprs(exprs);
-        }
-        if (ctx.select_stmt() != null) {
-            insertStmt.setSelectStmt(visitSelect_stmt(ctx.select_stmt()));
-        }
-        if (ctx.K_VALUES() != null) {
-            insertStmt.setValues(ctx.K_VALUES().getSymbol().getText());
-        }
-        return insertStmt;
-    }
+//    @Override
+//    public InsertStmt visitInsert_stmt(SQLParser.Insert_stmtContext ctx) {
+//        InsertStmt insertStmt = new InsertStmt();
+//        if (ctx.database_name() != null) {
+//            insertStmt.setDatabaseName(ctx.database_name().any_name().getText());
+//        }
+//        if (ctx.table_name() != null) {
+//            insertStmt.setTableName(ctx.table_name().any_name().getText());
+//        }
+//        if (ctx.column_name() != null) {
+//            List<String> columName = new ArrayList<>();
+//            for (int i = 0; i < ctx.column_name().size(); i++) {
+//                columName.add(ctx.column_name(i).any_name().getText());
+//            }
+//            insertStmt.setColumnName(columName);
+//        }
+//        if (ctx.expr() != null) {
+//            List<Expr> exprs = new ArrayList<>();
+//            for (int i = 0; i < ctx.expr().size(); i++) {
+//                exprs.add(visitExpr(ctx.expr(i)));
+//            }
+//            insertStmt.setExprs(exprs);
+//        }
+//        if (ctx.select_stmt() != null) {
+//            insertStmt.setSelectStmt(visitSelect_stmt(ctx.select_stmt()));
+//        }
+//        if (ctx.K_VALUES() != null) {
+//            insertStmt.setValues(ctx.K_VALUES().getSymbol().getText());
+//        }
+//        return insertStmt;
+//    }
 
-
-    @Override
-    public DropStmt visitDrop_table_stmt(SQLParser.Drop_table_stmtContext ctx) {
-        DropStmt dropStmt = new DropStmt();
-        if (ctx.database_name() != null) {
-            dropStmt.setDataBaseName(ctx.database_name().any_name().getText());
-        }
-        if (ctx.table_name() != null) {
-
-            dropStmt.setTableName(ctx.table_name().any_name().getText());
-        }
-        return dropStmt;
-    }
-
-    @Override
-    public DeleteStmt visitDelete_stmt(SQLParser.Delete_stmtContext ctx) {
-        DeleteStmt deleteStmt = new DeleteStmt();
-        if (ctx.expr() != null) {
-
-            deleteStmt.setExpr(visitExpr(ctx.expr()));
-        }
-        if (ctx.qualified_table_name() != null) {
-            deleteStmt.setQualifiedTableName(visitQualified_table_name(ctx.qualified_table_name()));
-        }
-        if (ctx.K_WHERE() != null) {
-            deleteStmt.setWhere(ctx.K_WHERE().getSymbol().getText());
-        }
-        return deleteStmt;
-    }
+//
+//    @Override
+//    public DropStmt visitDrop_table_stmt(SQLParser.Drop_table_stmtContext ctx) {
+//        DropStmt dropStmt = new DropStmt();
+//        if (ctx.database_name() != null) {
+//            dropStmt.setDataBaseName(ctx.database_name().any_name().getText());
+//        }
+//        if (ctx.table_name() != null) {
+//
+//            dropStmt.setTableName(ctx.table_name().any_name().getText());
+//        }
+//        return dropStmt;
+//    }
+//
+//    @Override
+//    public DeleteStmt visitDelete_stmt(SQLParser.Delete_stmtContext ctx) {
+//        DeleteStmt deleteStmt = new DeleteStmt();
+//        if (ctx.expr() != null) {
+//
+//            deleteStmt.setExpr(visitExpr(ctx.expr()));
+//        }
+//        if (ctx.qualified_table_name() != null) {
+//            deleteStmt.setQualifiedTableName(visitQualified_table_name(ctx.qualified_table_name()));
+//        }
+//        if (ctx.K_WHERE() != null) {
+//            deleteStmt.setWhere(ctx.K_WHERE().getSymbol().getText());
+//        }
+//        return deleteStmt;
+//    }
 
     @Override
     public QualifiedTableName visitQualified_table_name(SQLParser.Qualified_table_nameContext ctx) {
@@ -1861,28 +1847,28 @@ public class BaseVisitor extends SQLBaseVisitor {
         return qualifiedTableName;
     }
 
-    @Override
-    public UpdateStmt visitUpdate_stmt(SQLParser.Update_stmtContext ctx) {
-        UpdateStmt updateStmt = new UpdateStmt();
-        updateStmt.setQualifiedTableName(visitQualified_table_name(ctx.qualified_table_name()));
-        List<String> columnName = new ArrayList<>();
-        for (int i = 0; i < ctx.column_name().size(); i++) {
-            columnName.add(ctx.column_name(i).any_name().getText());
-
-            updateStmt.setColumnName(columnName);
-        }
-
-        if (ctx.expr() != null) {
-            List<Expr> exprs = new ArrayList<>();
-            for (int i = 0; i < ctx.expr().size(); i++) {
-                exprs.add(visitExpr(ctx.expr(i)));
-            }
-            updateStmt.setExpr(exprs);
-        }
-
-        return updateStmt;
-    }
-
+//    @Override
+//    public UpdateStmt visitUpdate_stmt(SQLParser.Update_stmtContext ctx) {
+//        UpdateStmt updateStmt = new UpdateStmt();
+//        updateStmt.setQualifiedTableName(visitQualified_table_name(ctx.qualified_table_name()));
+//        List<String> columnName = new ArrayList<>();
+//        for (int i = 0; i < ctx.column_name().size(); i++) {
+//            columnName.add(ctx.column_name(i).any_name().getText());
+//
+//            updateStmt.setColumnName(columnName);
+//        }
+//
+//        if (ctx.expr() != null) {
+//            List<Expr> exprs = new ArrayList<>();
+//            for (int i = 0; i < ctx.expr().size(); i++) {
+//                exprs.add(visitExpr(ctx.expr(i)));
+//            }
+//            updateStmt.setExpr(exprs);
+//        }
+//
+//        return updateStmt;
+//    }
+//
 
     @Override
     public SelectCore visitSelect_core(SQLParser.Select_coreContext ctx) {
@@ -2049,14 +2035,14 @@ public class BaseVisitor extends SQLBaseVisitor {
             }
             body.setDef_print_stmt(def_print_stmts);
         }
-        // Array_stmt
-        if (ctx.array_stmt() != null) {
-            List<Array_stmt> array_stmts = new ArrayList<>();
-            for (int i = 0; i < ctx.array_stmt().size(); i++) {
-                array_stmts.add(visitArray_stmt(ctx.array_stmt(i)));
-            }
-            body.setArray_stmt(array_stmts);
-        }
+//        // Array_stmt
+//        if (ctx.array_stmt() != null) {
+//            List<Array_stmt> array_stmts = new ArrayList<>();
+//            for (int i = 0; i < ctx.array_stmt().size(); i++) {
+//                array_stmts.add(visitArray_stmt(ctx.array_stmt(i)));
+//            }
+//            body.setArray_stmt(array_stmts);
+//        }
 
         // Inline_condition_stmt
         if (ctx.inline_condition_stmt() != null) {
@@ -2094,23 +2080,23 @@ public class BaseVisitor extends SQLBaseVisitor {
             body.setfunc_argument_list(func_argument_lists);
         }
 
-        //call_json
-        if (ctx.call_json() != null) {
-            List<Call_json> call_jsons = new ArrayList<>();
-            for (int i = 0; i < ctx.call_json().size(); i++) {
-                call_jsons.add(visitCall_json(ctx.call_json().get(i)));
-            }
-            body.setcall_json(call_jsons);
-        }
-
-        //edit json
-        if (ctx.edit_json() != null) {
-            List<Edit_json> edit_jsons = new ArrayList<>();
-            for (int i = 0; i < ctx.edit_json().size(); i++) {
-                edit_jsons.add(visitEdit_json(ctx.edit_json().get(i)));
-            }
-            body.setedit_json(edit_jsons);
-        }
+//        //call_json
+//        if (ctx.call_json() != null) {
+//            List<Call_json> call_jsons = new ArrayList<>();
+//            for (int i = 0; i < ctx.call_json().size(); i++) {
+//                call_jsons.add(visitCall_json(ctx.call_json().get(i)));
+//            }
+//            body.setcall_json(call_jsons);
+//        }
+//
+//        //edit json
+//        if (ctx.edit_json() != null) {
+//            List<Edit_json> edit_jsons = new ArrayList<>();
+//            for (int i = 0; i < ctx.edit_json().size(); i++) {
+//                edit_jsons.add(visitEdit_json(ctx.edit_json().get(i)));
+//            }
+//            body.setedit_json(edit_jsons);
+//        }
 
         //var_operator
         if (ctx.var_operator() != null) {
@@ -2121,15 +2107,15 @@ public class BaseVisitor extends SQLBaseVisitor {
             body.setvar_operator(var_operators);
         }
 
-        // var json_stmt
-        if (ctx.json_stmt() != null) {
-            List<Json_stmt> json_stmts = new ArrayList<>();
-            for (int i = 0; i < ctx.json_stmt().size(); i++) {
-                json_stmts.add(visitJson_stmt(ctx.json_stmt().get(i)));
-            }
-            body.setJson_stmt(json_stmts);
-
-        }
+//        // var json_stmt
+//        if (ctx.json_stmt() != null) {
+//            List<Json_stmt> json_stmts = new ArrayList<>();
+//            for (int i = 0; i < ctx.json_stmt().size(); i++) {
+//                json_stmts.add(visitJson_stmt(ctx.json_stmt().get(i)));
+//            }
+//            body.setJson_stmt(json_stmts);
+//
+//        }
         if (ctx.return_stmt() != null) {
             body.setReturnStmt(visitReturn_stmt(ctx.return_stmt()));
         }
@@ -2195,6 +2181,7 @@ public class BaseVisitor extends SQLBaseVisitor {
             varSymbol.setScope(parentScope);
             varSymbol.setType(type);
             parentScope.addSymbol(varName, varSymbol);
+            parentScope.setSymbol(varSymbol);
             // end
             varInit.setExpr(expr);
         }
@@ -2224,11 +2211,11 @@ public class BaseVisitor extends SQLBaseVisitor {
     @Override
     public Print_body visitPrint_body(SQLParser.Print_bodyContext ctx) {
         Print_body print_body = new Print_body();
-        if (ctx.call_json() != null) {
-            for (int i = 0; i < ctx.call_json().size(); i++) {
-                print_body.setCall_json(visitCall_json(ctx.call_json().get(i)));
-            }
-        }
+//        if (ctx.call_json() != null) {
+//            for (int i = 0; i < ctx.call_json().size(); i++) {
+//                print_body.setCall_json(visitCall_json(ctx.call_json().get(i)));
+//            }
+//        }
 
         if (ctx.expr_print() != null) {
             List<Expr_Print> exprs = new ArrayList<>();
@@ -2240,50 +2227,50 @@ public class BaseVisitor extends SQLBaseVisitor {
         return print_body;
     }
 
-    // call json
-    @Override
-    public Call_json visitCall_json(SQLParser.Call_jsonContext ctx) {
-        Call_json call_json = new Call_json();
-        if (ctx.any_name() != null) {
-            List<AnyName> anyNames = new ArrayList<>();
-            for (int i = 0; i < ctx.any_name().size(); i++) {
-                anyNames.add(visitAny_name(ctx.any_name(i)));
-            }
-            call_json.setAnyName(anyNames);
-        }
-        return call_json;
-    }
-
-    // edit json
-    @Override
-    public Edit_json visitEdit_json(SQLParser.Edit_jsonContext ctx) {
-        Edit_json edit_json = new Edit_json();
-        if (ctx.any_name() != null) {
-            List<AnyName> anyNames = new ArrayList<>();
-            for (int i = 0; i < ctx.any_name().size(); i++) {
-                anyNames.add(visitAny_name(ctx.any_name(i)));
-            }
-            edit_json.setAnyNameList(anyNames);
-
-        }
-        if (ctx.signed_number() != null) {
-            edit_json.setSignedNumber(visitSigned_number(ctx.signed_number()));
-        }
-        if (ctx.expr() != null) {
-            edit_json.setExpr(visitExpr(ctx.expr()));
-        }
-        if (ctx.ASSIGN() != null) {
-            edit_json.setAssin(ctx.ASSIGN().getSymbol().getText());
-        }
-        if (ctx.DOT() != null) {
-            List<String> dot = new ArrayList<>();
-            for (int i = 0; i < ctx.DOT().size(); i++) {
-                dot.add(ctx.DOT().get(i).getSymbol().getText());
-            }
-            edit_json.setDot(dot);
-        }
-        return edit_json;
-    }
+//    // call json
+//    @Override
+//    public Call_json visitCall_json(SQLParser.Call_jsonContext ctx) {
+//        Call_json call_json = new Call_json();
+//        if (ctx.any_name() != null) {
+//            List<AnyName> anyNames = new ArrayList<>();
+//            for (int i = 0; i < ctx.any_name().size(); i++) {
+//                anyNames.add(visitAny_name(ctx.any_name(i)));
+//            }
+//            call_json.setAnyName(anyNames);
+//        }
+//        return call_json;
+//    }
+//
+//    // edit json
+//    @Override
+//    public Edit_json visitEdit_json(SQLParser.Edit_jsonContext ctx) {
+//        Edit_json edit_json = new Edit_json();
+//        if (ctx.any_name() != null) {
+//            List<AnyName> anyNames = new ArrayList<>();
+//            for (int i = 0; i < ctx.any_name().size(); i++) {
+//                anyNames.add(visitAny_name(ctx.any_name(i)));
+//            }
+//            edit_json.setAnyNameList(anyNames);
+//
+//        }
+//        if (ctx.signed_number() != null) {
+//            edit_json.setSignedNumber(visitSigned_number(ctx.signed_number()));
+//        }
+//        if (ctx.expr() != null) {
+//            edit_json.setExpr(visitExpr(ctx.expr()));
+//        }
+//        if (ctx.ASSIGN() != null) {
+//            edit_json.setAssin(ctx.ASSIGN().getSymbol().getText());
+//        }
+//        if (ctx.DOT() != null) {
+//            List<String> dot = new ArrayList<>();
+//            for (int i = 0; i < ctx.DOT().size(); i++) {
+//                dot.add(ctx.DOT().get(i).getSymbol().getText());
+//            }
+//            edit_json.setDot(dot);
+//        }
+//        return edit_json;
+//    }
 
 
     // visit_if
@@ -2292,6 +2279,8 @@ public class BaseVisitor extends SQLBaseVisitor {
         Scope parentScope = Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1);
 
         If_stmt if_stmt = new If_stmt();
+
+        if_stmt.setParentScope(parentScope);
         List<Else_if> else_ifList = new ArrayList<>();
         Body body = new Body();
         //print statement
@@ -2321,9 +2310,12 @@ public class BaseVisitor extends SQLBaseVisitor {
             if_stmt.setElsee(visitElse_stmt(ctx.else_stmt()));
         }
         if (ctx.expr_if() != null) {
-            if_stmt.setExpr_if(visitExpr_if(ctx.expr_if()));
+            List<Expr_if> expr_ifs = new ArrayList<>();
+            for (int i = 0; i < ctx.expr_if().expr_if().size(); i++) {
+                expr_ifs.add(visitExpr_if(ctx.expr_if().expr_if(i)));
+            }
+            if_stmt.setExpr_ifs(expr_ifs);
         }
-
 
         return if_stmt;
     }
@@ -2366,13 +2358,21 @@ public class BaseVisitor extends SQLBaseVisitor {
 
     @Override
     public While_stmt visitWhile_stmt(SQLParser.While_stmtContext ctx) {
+        Scope parentScope = Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1);
+
+
         // declare all object in if
         While_stmt while_stmt = new While_stmt();
+        while_stmt.setParentScope(parentScope);
         if (ctx.body() != null) {
             while_stmt.setBody_while(visitBody(ctx.body()));
         }
-        if (ctx.expr_while() != null) {
-            while_stmt.setExpr_while(visitExpr_while(ctx.expr_while()));
+        if (ctx.expr_while().expr_while() != null) {
+            List<Expr_while> list = new ArrayList<>();
+            for (int i = 0; i < ctx.expr_while().expr_while().size(); i++) {
+                list.add(visitExpr_while(ctx.expr_while()).getExpr_while().get(i));
+            }
+            while_stmt.setExpr_whileList(list);
         }
         if (ctx.K_WHILE() != null) {
             while_stmt.setK_while(ctx.K_WHILE().getSymbol().getText());
@@ -2452,6 +2452,7 @@ public class BaseVisitor extends SQLBaseVisitor {
                 varForSymbol.setScope(parentScope);
                 varForSymbol.setIsParam(true);
                 parentScope.addSymbol(varForSymbol.getName(), varForSymbol);
+                parentScope.setSymbol(varForSymbol);
             }
 
             System.out.println("varName: "+varForSymbol.getName()+" parentScope:"+varForSymbol.getScope().getId()
@@ -2479,6 +2480,7 @@ public class BaseVisitor extends SQLBaseVisitor {
                     varForSymbol.setIsParam(true);
                     varForSymbol.setScope(parentScope);
                     parentScope.addSymbol(varForSymbol.getName(),varForSymbol);
+                    parentScope.setSymbol(varForSymbol);
 
                     System.out.println("varName: "+varForSymbol.getName()
                             +" parentScope:"+varForSymbol.getScope().getId());
@@ -2523,28 +2525,28 @@ public class BaseVisitor extends SQLBaseVisitor {
         return while_do_stmt;
     }
 
-    @Override
-    public Array_stmt visitArray_stmt(SQLParser.Array_stmtContext ctx) {
-        Array_stmt array_stmt = new Array_stmt();
-        List<AnyName> anyNames = new ArrayList<>();
-        List<SignedNumber> signedNumbers = new ArrayList<>();
-        if (ctx.any_name() != null) {
-            for (int i = 0; i < ctx.any_name().size(); i++) {
-                anyNames.add(visitAny_name(ctx.any_name(i)));
-            }
-            array_stmt.setAny_name(anyNames);
-        }
-        if (ctx.signed_number() != null) {
-            for (int i = 0; i < ctx.signed_number().size(); i++) {
-                signedNumbers.add(visitSigned_number(ctx.signed_number(i)));
-            }
-            array_stmt.setSigned_number(signedNumbers);
-        }
-        if (ctx.sql_stmt_list() != null) {
-            array_stmt.setSql_stmt_list(visitSql_stmt_list(ctx.sql_stmt_list()));
-        }
-        return array_stmt;
-    }
+//    @Override
+//    public Array_stmt visitArray_stmt(SQLParser.Array_stmtContext ctx) {
+//        Array_stmt array_stmt = new Array_stmt();
+//        List<AnyName> anyNames = new ArrayList<>();
+//        List<SignedNumber> signedNumbers = new ArrayList<>();
+//        if (ctx.any_name() != null) {
+//            for (int i = 0; i < ctx.any_name().size(); i++) {
+//                anyNames.add(visitAny_name(ctx.any_name(i)));
+//            }
+//            array_stmt.setAny_name(anyNames);
+//        }
+//        if (ctx.signed_number() != null) {
+//            for (int i = 0; i < ctx.signed_number().size(); i++) {
+//                signedNumbers.add(visitSigned_number(ctx.signed_number(i)));
+//            }
+//            array_stmt.setSigned_number(signedNumbers);
+//        }
+//        if (ctx.sql_stmt_list() != null) {
+//            array_stmt.setSql_stmt_list(visitSql_stmt_list(ctx.sql_stmt_list()));
+//        }
+//        return array_stmt;
+//    }
 
     @Override
     public Inline_condition_stmt visitInline_condition_stmt(SQLParser.Inline_condition_stmtContext ctx) {
@@ -2655,131 +2657,131 @@ public class BaseVisitor extends SQLBaseVisitor {
         return var_operator;
     }
 
-    @Override
-    public Json_stmt visitJson_stmt(SQLParser.Json_stmtContext ctx) {
-        Json_stmt json_stmt = new Json_stmt();
-        if (ctx.json_array() != null) {
-            List<Json_array> json_arrays = new ArrayList<>();
-            for (int i = 0; i < ctx.json_array().size(); i++) {
-                json_arrays.add(visitJson_array(ctx.json_array(i)));
-            }
-            json_stmt.setJson_arrays(json_arrays);
-        }
-        if (ctx.json_attribute() != null) {
-            List<Json_attribute> json_attributes = new ArrayList<>();
-            for (int i = 0; i < ctx.json_attribute().size(); i++) {
-                json_attributes.add(visitJson_attribute(ctx.json_attribute(i)));
-            }
-            json_stmt.setJson_attributes(json_attributes);
-        }
-        if (ctx.json_obj() != null) {
-            List<Json_obj> json_objs = new ArrayList<>();
-            for (int i = 0; i < ctx.json_obj().size(); i++) {
-                json_objs.add(visitJson_obj(ctx.json_obj(i)));
-            }
-            json_stmt.setJson_objs(json_objs);
-        }
-        if (ctx.ASSIGN() != null) {
-            json_stmt.setAssign(ctx.ASSIGN().getSymbol().getText());
-        }
-        if (ctx.K_VAR() != null) {
-            json_stmt.setK_var(ctx.K_VAR().getSymbol().getText());
-        }
-        if (ctx.any_name() != null) {
-            json_stmt.setAnyName(visitAny_name(ctx.any_name()));
-        }
-        return json_stmt;
-    }
-
-    @Override
-    public Json_attribute visitJson_attribute(SQLParser.Json_attributeContext ctx) {
-        Json_attribute json_attribute = new Json_attribute();
-        if (ctx.expr() != null) {
-            json_attribute.setExpr(visitExpr(ctx.expr()));
-        }
-        if (ctx.IDENTIFIER() != null) {
-            json_attribute.setIdentifier(ctx.IDENTIFIER().getSymbol().getText());
-        }
-        if (ctx.ORM() != null) {
-            json_attribute.setORM(ctx.ORM().getSymbol().getText());
-        }
-        return json_attribute;
-    }
-
-    @Override
-    public Json_obj visitJson_obj(SQLParser.Json_objContext ctx) {
-
-        Json_obj jsonObject = new Json_obj();
-        List<Json_attribute> json_attributes = new ArrayList<>();
-        List<Json_obj> json_objs = new ArrayList<>();
-        List<Json_array> json_arrays = new ArrayList<>();
-        if (ctx.json_array() != null) {
-            for (int i = 0; i < ctx.json_array().size(); i++) {
-                json_arrays.add(visitJson_array(ctx.json_array(i)));
-            }
-            jsonObject.setJson_arrays(json_arrays);
-        }
-        if (ctx.json_attribute() != null) {
-            for (int i = 0; i < ctx.json_attribute().size(); i++) {
-                json_attributes.add(visitJson_attribute(ctx.json_attribute(i)));
-            }
-            jsonObject.setJson_attributes(json_attributes);
-        }
-        if (ctx.json_obj() != null) {
-            for (int i = 0; i < ctx.json_obj().size(); i++) {
-                json_objs.add(visitJson_obj(ctx.json_obj(i)));
-            }
-            jsonObject.setJson_objs(json_objs);
-        }
-        if (ctx.IDENTIFIER() != null) {
-            jsonObject.setIdentifier(ctx.IDENTIFIER().getSymbol().getText());
-        }
-        if (ctx.ORM() != null) {
-            jsonObject.setORM(ctx.ORM().getSymbol().getText());
-        }
-
-        return jsonObject;
-
-    }
-
-
-    @Override
-    public Json_array visitJson_array(SQLParser.Json_arrayContext ctx) {
-
-        Json_array json_array = new Json_array();
-
-        List<Json_obj> json_objs = new ArrayList<>();
-        List<AnyName> anyNames = new ArrayList<>();
-        List<SignedNumber> signedNumbers = new ArrayList<>();
-
-        if (ctx.IDENTIFIER() != null) {
-            json_array.setIdentifier(ctx.IDENTIFIER().getSymbol().getText());
-        }
-        if (ctx.any_name() != null) {
-            for (int i = 0; i < ctx.any_name().size(); i++) {
-                anyNames.add(visitAny_name(ctx.any_name(i)));
-            }
-            json_array.setAnyNames(anyNames);
-        }
-
-        if (ctx.signed_number() != null) {
-            for (int i = 0; i < ctx.signed_number().size(); i++) {
-                signedNumbers.add(visitSigned_number(ctx.signed_number(i)));
-            }
-            json_array.setSignedNumbers(signedNumbers);
-        }
-
-
-        if (ctx.json_obj() != null) {
-            for (int i = 0; i < ctx.json_obj().size(); i++) {
-                json_objs.add(visitJson_obj(ctx.json_obj(i)));
-            }
-            json_array.setJson_objs(json_objs);
-        }
-        if (ctx.ORM() != null) {
-            json_array.setORM(ctx.ORM().getSymbol().getText());
-        }
-
-        return json_array;
-    }
+//    @Override
+//    public Json_stmt visitJson_stmt(SQLParser.Json_stmtContext ctx) {
+//        Json_stmt json_stmt = new Json_stmt();
+//        if (ctx.json_array() != null) {
+//            List<Json_array> json_arrays = new ArrayList<>();
+//            for (int i = 0; i < ctx.json_array().size(); i++) {
+//                json_arrays.add(visitJson_array(ctx.json_array(i)));
+//            }
+//            json_stmt.setJson_arrays(json_arrays);
+//        }
+//        if (ctx.json_attribute() != null) {
+//            List<Json_attribute> json_attributes = new ArrayList<>();
+//            for (int i = 0; i < ctx.json_attribute().size(); i++) {
+//                json_attributes.add(visitJson_attribute(ctx.json_attribute(i)));
+//            }
+//            json_stmt.setJson_attributes(json_attributes);
+//        }
+//        if (ctx.json_obj() != null) {
+//            List<Json_obj> json_objs = new ArrayList<>();
+//            for (int i = 0; i < ctx.json_obj().size(); i++) {
+//                json_objs.add(visitJson_obj(ctx.json_obj(i)));
+//            }
+//            json_stmt.setJson_objs(json_objs);
+//        }
+//        if (ctx.ASSIGN() != null) {
+//            json_stmt.setAssign(ctx.ASSIGN().getSymbol().getText());
+//        }
+//        if (ctx.K_VAR() != null) {
+//            json_stmt.setK_var(ctx.K_VAR().getSymbol().getText());
+//        }
+//        if (ctx.any_name() != null) {
+//            json_stmt.setAnyName(visitAny_name(ctx.any_name()));
+//        }
+//        return json_stmt;
+//    }
+//
+//    @Override
+//    public Json_attribute visitJson_attribute(SQLParser.Json_attributeContext ctx) {
+//        Json_attribute json_attribute = new Json_attribute();
+//        if (ctx.expr() != null) {
+//            json_attribute.setExpr(visitExpr(ctx.expr()));
+//        }
+//        if (ctx.IDENTIFIER() != null) {
+//            json_attribute.setIdentifier(ctx.IDENTIFIER().getSymbol().getText());
+//        }
+//        if (ctx.ORM() != null) {
+//            json_attribute.setORM(ctx.ORM().getSymbol().getText());
+//        }
+//        return json_attribute;
+//    }
+//
+//    @Override
+//    public Json_obj visitJson_obj(SQLParser.Json_objContext ctx) {
+//
+//        Json_obj jsonObject = new Json_obj();
+//        List<Json_attribute> json_attributes = new ArrayList<>();
+//        List<Json_obj> json_objs = new ArrayList<>();
+//        List<Json_array> json_arrays = new ArrayList<>();
+//        if (ctx.json_array() != null) {
+//            for (int i = 0; i < ctx.json_array().size(); i++) {
+//                json_arrays.add(visitJson_array(ctx.json_array(i)));
+//            }
+//            jsonObject.setJson_arrays(json_arrays);
+//        }
+//        if (ctx.json_attribute() != null) {
+//            for (int i = 0; i < ctx.json_attribute().size(); i++) {
+//                json_attributes.add(visitJson_attribute(ctx.json_attribute(i)));
+//            }
+//            jsonObject.setJson_attributes(json_attributes);
+//        }
+//        if (ctx.json_obj() != null) {
+//            for (int i = 0; i < ctx.json_obj().size(); i++) {
+//                json_objs.add(visitJson_obj(ctx.json_obj(i)));
+//            }
+//            jsonObject.setJson_objs(json_objs);
+//        }
+//        if (ctx.IDENTIFIER() != null) {
+//            jsonObject.setIdentifier(ctx.IDENTIFIER().getSymbol().getText());
+//        }
+//        if (ctx.ORM() != null) {
+//            jsonObject.setORM(ctx.ORM().getSymbol().getText());
+//        }
+//
+//        return jsonObject;
+//
+//    }
+//
+//
+//    @Override
+//    public Json_array visitJson_array(SQLParser.Json_arrayContext ctx) {
+//
+//        Json_array json_array = new Json_array();
+//
+//        List<Json_obj> json_objs = new ArrayList<>();
+//        List<AnyName> anyNames = new ArrayList<>();
+//        List<SignedNumber> signedNumbers = new ArrayList<>();
+//
+//        if (ctx.IDENTIFIER() != null) {
+//            json_array.setIdentifier(ctx.IDENTIFIER().getSymbol().getText());
+//        }
+//        if (ctx.any_name() != null) {
+//            for (int i = 0; i < ctx.any_name().size(); i++) {
+//                anyNames.add(visitAny_name(ctx.any_name(i)));
+//            }
+//            json_array.setAnyNames(anyNames);
+//        }
+//
+//        if (ctx.signed_number() != null) {
+//            for (int i = 0; i < ctx.signed_number().size(); i++) {
+//                signedNumbers.add(visitSigned_number(ctx.signed_number(i)));
+//            }
+//            json_array.setSignedNumbers(signedNumbers);
+//        }
+//
+//
+//        if (ctx.json_obj() != null) {
+//            for (int i = 0; i < ctx.json_obj().size(); i++) {
+//                json_objs.add(visitJson_obj(ctx.json_obj(i)));
+//            }
+//            json_array.setJson_objs(json_objs);
+//        }
+//        if (ctx.ORM() != null) {
+//            json_array.setORM(ctx.ORM().getSymbol().getText());
+//        }
+//
+//        return json_array;
+//    }
 }

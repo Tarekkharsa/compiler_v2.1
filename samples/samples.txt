@@ -1,38 +1,16 @@
 
 
-create type Address (
-name String,
-id number
-);
-
-Create Table Student (
-Id number,
-Name string,
-DateOfBirthEpoch number,
-HomeAddress Address,
-WorkAddress Address
-)
 
 
 func(){
 
-for(var i =0 ; i < 5; i++){}
+var z = 5;
 
-for(var j =0 ; j < 5; j++){}
+if (x == 5){
+var v = 5;
+var v = 5;
+while(b > 5){}
 
-for(var user : users){}
-
-if(x == 5){}
-
-do{}while(x == 5);
-
-    switch(x){
-    case 'd':{}
-    break;
-    case 'f':{}
-    break;
-    default:{}
-
-    }
+}
 
 }

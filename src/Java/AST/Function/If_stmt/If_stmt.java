@@ -1,17 +1,28 @@
 package Java.AST.Function.If_stmt;
 
-import Java.AST.Expr.Expr;
 import Java.AST.Expr.Expr_if;
 import Java.AST.Function.Body;
-import Java.AST.Function.If_stmt.Else;
-import Java.AST.Function.If_stmt.Else_if;
 
 import Java.AST.Node;
+import Java.SymbolTable.Scope;
 
-import java.util.ArrayList;
 import java.util.List;
 public class If_stmt extends Node {
     private String K_if;
+    private Scope parentScope;
+
+    private Body body_if= new Body() ;
+     private List<Expr_if> expr_ifs;
+     private List<Else_if> else_ifList;
+     private Else elsee=new Else();
+
+    public Scope getParentScope() {
+        return parentScope;
+    }
+
+    public void setParentScope(Scope parentScope) {
+        this.parentScope = parentScope;
+    }
 
     public String getK_if() {
         return K_if;
@@ -21,11 +32,6 @@ public class If_stmt extends Node {
         K_if = k_if;
     }
 
-    private Body body_if= new Body() ;
-     private Expr_if expr_if = new Expr_if();
-     private List <Else_if> else_ifList;
-     private Else elsee=new Else();
-
     public Body getBody_if() {
         return body_if;
     }
@@ -34,12 +40,12 @@ public class If_stmt extends Node {
         this.body_if = body_if;
     }
 
-    public Expr_if getExpr_if() {
-        return expr_if;
+    public List<Expr_if> getExpr_ifs() {
+        return expr_ifs;
     }
 
-    public void setExpr_if(Expr_if expr_if) {
-        this.expr_if = expr_if;
+    public void setExpr_ifs(List<Expr_if> expr_ifs) {
+        this.expr_ifs = expr_ifs;
     }
 
     public List<Else_if> getElse_ifList() {
