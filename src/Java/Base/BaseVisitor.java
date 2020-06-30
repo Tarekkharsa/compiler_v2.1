@@ -1623,7 +1623,7 @@ public class BaseVisitor extends SQLBaseVisitor {
         Type columnType = new Type();
 
 
-        System.out.println("visitColumn_def " + Main.rightType.getName());
+//        System.out.println("visitColumn_def " + Main.rightType.getName());
 
         if (ctx.column_name() != null) {
             columnDef.setColumnName(ctx.column_name().getText());
@@ -1646,7 +1646,9 @@ public class BaseVisitor extends SQLBaseVisitor {
             columnDef.setTypeName(typeNames);
             columnType.setName(ctx.type_name().get(0).name().any_name().getText());
         }
-
+        if(Main.rightType.getColumns().containsKey(ctx.column_name().getText())){
+            System.err.println("duplicate column "+ ctx.column_name().getText() +" in " + Main.rightType.getName() + " line " +ctx.getStart().getLine());
+        }
         Main.rightType.getColumns().put(ctx.column_name().getText(), columnType);
         return columnDef;
     }
@@ -1654,6 +1656,7 @@ public class BaseVisitor extends SQLBaseVisitor {
 
     @Override
     public TypeName visitType_name(SQLParser.Type_nameContext ctx) {
+
 
 
         TypeName typeName = new TypeName();

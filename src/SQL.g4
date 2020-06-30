@@ -889,7 +889,7 @@ join_operator
 join_constraint
 // : ( K_ON expr
 //   | K_USING '(' column_name ( ',' column_name )* ')' )?
-    : ( K_ON expr)?
+    : ( K_ON? expr)?
  ;
 
 select_core

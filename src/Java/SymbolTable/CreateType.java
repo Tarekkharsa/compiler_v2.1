@@ -12,6 +12,7 @@ public class CreateType extends Statement {
 
    private AnyName anyName ;
     private List<ColumnDef> columnDefList;
+    private Type type;
 
     public List<ColumnDef> getColumnDefList() {
         return columnDefList;
@@ -21,7 +22,6 @@ public class CreateType extends Statement {
         this.columnDefList = columnDefList;
     }
 
-    private Type type;
 
     public AnyName getAnyName() {
         return anyName;
