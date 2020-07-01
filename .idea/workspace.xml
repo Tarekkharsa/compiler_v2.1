@@ -6,12 +6,10 @@
       <change beforePath="$PROJECT_DIR$/out/production/AST_getting_started/Java/AST/Visitor/BaseASTVisitor.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/AST_getting_started/Java/AST/Visitor/BaseASTVisitor.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/AST_getting_started/Java/Base/BaseVisitor.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/AST_getting_started/Java/Base/BaseVisitor.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/samples/samples.txt" beforeDir="false" afterPath="$PROJECT_DIR$/samples/samples.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Java/AST/Expr/Expr.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Java/AST/Expr/Expr.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Java/AST/QueryStmt/SelectStmt/SelectCore.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Java/AST/QueryStmt/SelectStmt/SelectCore.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Java/AST/Visitor/BaseASTVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Java/AST/Visitor/BaseASTVisitor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Java/Base/BaseVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Java/Base/BaseVisitor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Java/SymbolTable/CreateType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Java/SymbolTable/CreateType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/SQL.g4" beforeDir="false" afterPath="$PROJECT_DIR$/src/SQL.g4" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/generated/SQL.interp" beforeDir="false" afterPath="$PROJECT_DIR$/src/generated/SQL.interp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/generated/SQLParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/generated/SQLParser.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -216,6 +214,7 @@
       <workItem from="1593284046396" duration="10015000" />
       <workItem from="1593431003466" duration="6396000" />
       <workItem from="1593511599521" duration="17388000" />
+      <workItem from="1593624966670" duration="14949000" />
     </task>
     <servers />
   </component>

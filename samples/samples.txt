@@ -1,3 +1,1 @@
-SELECT COUNT(CustomerID), Country
-FROM Customers
-GROUP BY Count(Country);
+select xx from tt where x IN(select qq from y);

@@ -5,6 +5,7 @@ import Java.AST.QueryStmt.JoinClause;
 import Java.AST.QueryStmt.SelectOrSubQuery.ResultColumn;
 import Java.AST.QueryStmt.SelectOrSubQuery.TableOrSubQuery;
 import Java.AST.QueryStmt.Statement;
+import Java.SymbolTable.Scope;
 
 import java.util.List;
 
@@ -23,6 +24,16 @@ public class SelectCore   {
     private String SELECT;
     private String VALUES;
     private String Where;
+    private Scope scope;
+
+    public Scope getScope() {
+        return scope;
+    }
+
+    public void setScope(Scope scope) {
+        this.scope = scope;
+    }
+
     public String getAll() {
         return All;
     }

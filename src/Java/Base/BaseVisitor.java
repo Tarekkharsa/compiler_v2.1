@@ -376,14 +376,6 @@ public class BaseVisitor extends SQLBaseVisitor {
         if (ctx.unary_operator() != null) {
             expr.setUnaryOperator(visitUnary_operator(ctx.unary_operator()));
         }
-
-        if (ctx.expr() != null) {
-            List<Expr> exprs = new ArrayList<>();
-            for (int i = 0; i < ctx.expr().size(); i++) {
-                exprs.add(visitExpr(ctx.expr(i)));
-            }
-            expr.setExprs(exprs);
-        }
         if (ctx.database_name() != null) {
             expr.setDatabaseName(ctx.database_name().any_name().getText());
         }
@@ -391,11 +383,29 @@ public class BaseVisitor extends SQLBaseVisitor {
             expr.setTableName(ctx.table_name().any_name().getText());
         }
         if (ctx.column_name() != null) {
-
             expr.setColumnName(ctx.column_name().any_name().getText());
+
+            Symbol symbol = new Symbol();
+            symbol.setName(ctx.column_name().any_name().getText());
+            symbol.setScope(Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1));
+            Type symbolType  =new Type();
+            symbolType.setName("columnName");
+            symbol.setType(symbolType);
+            Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1)
+                    .setSymbol(symbol);
+        }
+        if (ctx.expr() != null) {
+            List<Expr> exprs = new ArrayList<>();
+            for (int i = 0; i < ctx.expr().size(); i++) {
+                exprs.add(visitExpr(ctx.expr(i)));
+            }
+            expr.setExprs(exprs);
         }
         if (ctx.function_name() != null) {
             expr.setFunctionName(ctx.function_name().any_name().getText());
+        }
+        if (ctx.K_IN() != null) {
+            expr.setK_IN(ctx.K_IN().getSymbol().getText());
         }
         List<String> operation = new ArrayList<>();
         if (ctx.PIPE2() != null) {
@@ -509,7 +519,6 @@ public class BaseVisitor extends SQLBaseVisitor {
         if (ctx.inline_condition_stmt() != null && !ctx.inline_condition_stmt().isEmpty()) {
             expr.setInline_condition_stmt(visitInline_condition_stmt(ctx.inline_condition_stmt()));
         }
-
 
         return expr;
     }
@@ -945,17 +954,22 @@ public class BaseVisitor extends SQLBaseVisitor {
     @Override
     public ResultColumn visitResult_column(SQLParser.Result_columnContext ctx) {
 //        System.out.println("visitResult_column");
+
+
         ResultColumn resultColumn = new ResultColumn();
 
 
         if (ctx.expr() != null) {
-
 
             resultColumn.setExpr(visitExpr(ctx.expr()));
 
         }
         if (ctx.table_name() != null) {
             resultColumn.setTableName(ctx.table_name().any_name().getText());
+
+
+
+
         }
         if (ctx.column_alias() != null) {
             resultColumn.setColumnAlias(ctx.getText());
@@ -986,6 +1000,8 @@ public class BaseVisitor extends SQLBaseVisitor {
         if (ctx.table_name() != null) {
             symbolType.setName(ctx.table_name().getText());
             tableOrSubQuery.setTableName(ctx.table_name().any_name().getText());
+
+
         }
         if (ctx.table_alias() != null) {
             Symbol tableAliasSymbol = new Symbol();
@@ -1886,18 +1902,14 @@ public class BaseVisitor extends SQLBaseVisitor {
 
 //        System.out.println("visitSelect_core");
         SelectCore selectCore = new SelectCore();
+
+        selectCore.setScope(selectScope);
         if (ctx.join_clause() != null) {
 
             selectCore.setJoinClause(visitJoin_clause(ctx.join_clause()));
 
         }
-        if (ctx.expr() != null) {
-            List<Expr> exprs = new ArrayList<>();
-            for (int i = 0; i < ctx.expr().size(); i++) {
-                exprs.add(visitExpr(ctx.expr(i)));
-            }
-            selectCore.setExprs(exprs);
-        }
+
         if (ctx.result_column() != null) {
             List<ResultColumn> resultColumns = new ArrayList<>();
             for (int i = 0; i < ctx.result_column().size(); i++) {
@@ -1914,6 +1926,7 @@ public class BaseVisitor extends SQLBaseVisitor {
             }
             selectCore.setTableOrSubQueries(tableOrSubQueries);
         }
+
         if (ctx.K_FROM() != null) {
             selectCore.setFrom(ctx.K_FROM().getSymbol().getText());
         }
@@ -1941,7 +1954,13 @@ public class BaseVisitor extends SQLBaseVisitor {
         if (ctx.K_WHERE() != null) {
             selectCore.setWhere(ctx.K_WHERE().getSymbol().getText());
         }
-
+        if (ctx.expr() != null) {
+            List<Expr> exprs = new ArrayList<>();
+            for (int i = 0; i < ctx.expr().size(); i++) {
+                exprs.add(visitExpr(ctx.expr(i)));
+            }
+            selectCore.setExprs(exprs);
+        }
 
         return selectCore;
     }

@@ -48,7 +48,18 @@ public class BaseASTVisitor implements ASTVisitor {
 //        System.out.println("line number "+p.getLine());
 //        System.out.println("Col number "+p.getCol());
 
-
+//        System.out.println("Symbol table Select Core"  );
+//        for (int i = 0; i < Main.symbolTable.getScopes().size(); i++) {
+//            System.out.println("Parent Scop Name " + Main.symbolTable.getScopes().get(i).getId());
+//
+//            for (int i1 = 0; i1 < Main.symbolTable.getScopes().get(i).getSymbols().size(); i1++) {
+//                System.out.println(Main.symbolTable.getScopes().get(i).getSymbols().get(i1).getName());
+//            }
+////            Main.symbolTable.getScopes().get(i).getSymbolMap().entrySet().forEach(entry->{
+////                System.out.println("Scope ID : "+entry.getKey() + " | Symbol: "+entry.getValue().getName());
+////            });
+//
+//        }
     }
 
     @Override
@@ -924,6 +935,8 @@ public class BaseASTVisitor implements ASTVisitor {
             }
         }
 
+
+
     }
 
 
@@ -997,9 +1010,8 @@ public class BaseASTVisitor implements ASTVisitor {
     static boolean LiteralValueName;
     static boolean GroupBy;
     static boolean FunctionName;
+    static boolean WhereIN;
     private void printSelectCore(SelectCore selectCore) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast selectCore");
         if (selectCore.getJoinClause() != null) {
             printJoinClause(selectCore.getJoinClause());
         }
@@ -1065,14 +1077,12 @@ public class BaseASTVisitor implements ASTVisitor {
             System.err.println("Error Group by clause can’t contain aggregate function");
         }
 
-////        System.out.println("Symbol table Select Core"  );
-//        for (int i = 0; i < Main.symbolTable.getScopes().size(); i++) {
-////            System.out.println("Parent Type Name " + Main.symbolTable.getScopes().get(i).getId());
-//
-//            Main.symbolTable.getScopes().get(i).getSymbolMap().entrySet().forEach(entry->{
-////                System.out.println("Scope ID : "+entry.getKey() + " | Symbol: "+entry.getValue().getName());
-//            });
-//        }
+        if (selectCore.getScope().getParent() != null && WhereIN) {
+            if(selectCore.getResultColumnList().size() > 1 ){
+                System.err.println("IN Clause if return more than one column");
+            }
+        }
+
 
 
     }
@@ -1132,6 +1142,12 @@ public class BaseASTVisitor implements ASTVisitor {
             return;
         }
 
+
+        if (expr.getSql_stmt_list() != null) {
+            for (int i = 0; i < expr.getSql_stmt_list().size(); i++) {
+                visit(expr.getSql_stmt_list().get(i));
+            }
+        }
         if(expr.getDatabaseName() != null){
 //            System.out.println("DatabaseName : "+expr.getDatabaseName());
         }
@@ -1153,14 +1169,17 @@ public class BaseASTVisitor implements ASTVisitor {
         printLiteralValue(expr.getLiteralValue());
             LiteralValueName = true;
         }
+        if(expr.getK_IN() != null){
+            WhereIN = true;
+        }
 
         if (expr.getUnaryOperator() != null ) {
             printUnaryOperator(expr.getUnaryOperator());
         }
         if (expr.getOperation() != null) {
-            for (int i = 0; i < expr.getOperation().size(); i++) {
-//                System.out.println("Operation : " +expr.getOperation().get(i));
-            }
+//            for (int i = 0; i < expr.getOperation().size(); i++) {
+////                System.out.println("Operation : " +expr.getOperation().get(i));
+//            }
         }
         if (expr.getSelectStmt() != null) {
             printSelectStmt(expr.getSelectStmt());
@@ -1174,6 +1193,7 @@ public class BaseASTVisitor implements ASTVisitor {
         if (expr.getTableName() != null && expr.getColumnName() !=null) {
             checkColInTable(expr.getColumnName() , expr.getTableName());
         }
+
 
     }
 
@@ -1373,11 +1393,9 @@ public class BaseASTVisitor implements ASTVisitor {
         }
         if (tableOrSubQuery.getTableName() != null) {
 //            System.out.println("TableName : "+tableOrSubQuery.getTableName());
-            if(tableName == null){
-
             tableName = tableOrSubQuery.getTableName();
-            }
-//            checkIfTableExists(tableOrSubQuery.getTableName());
+
+            checkIfTableExists(tableOrSubQuery.getTableName());
         }
         if (tableOrSubQuery.getIndexName() != null) {
 //            System.out.println("IndexName : "+tableOrSubQuery.getIndexName());
@@ -1411,7 +1429,7 @@ public class BaseASTVisitor implements ASTVisitor {
 
         }
             if(!checkTable.get()){
-                System.err.println(tableName+ " not found "  );
+                System.err.println(table+ " not found "  );
             }
     }
 
@@ -1489,9 +1507,14 @@ public class BaseASTVisitor implements ASTVisitor {
         }
         if (resultColumn.getStar() != null) {
 //            System.out.println(resultColumn.getStar());
+            if(WhereIN){
+                System.err.println("Error IN Clause if return more than one column");
+            }
+//            ResultColumn = true;
         }
         if (resultColumn.getExpr() != null) {
                 printExprResultColumn(resultColumn.getExpr());
+                printExpr(resultColumn.getExpr());
         }
 
 

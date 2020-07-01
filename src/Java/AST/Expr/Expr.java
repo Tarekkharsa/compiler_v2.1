@@ -10,6 +10,7 @@ import java.util.List;
 public class Expr {
     private String databaseName;
     private String tableName;
+    private String K_IN;
     private String columnName;
     private UnaryOperator unaryOperator;
     private LiteralValue literalValue;
@@ -21,6 +22,13 @@ public class Expr {
     private List<Statement>  sql_stmt_list;
     private Inline_condition_stmt inline_condition_stmt;
 
+    public String getK_IN() {
+        return K_IN;
+    }
+
+    public void setK_IN(String k_IN) {
+        K_IN = k_IN;
+    }
 
     public List<Statement> getSql_stmt_list() {
         return sql_stmt_list;
