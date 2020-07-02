@@ -3,11 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="57616b6f-dc0e-4c54-9253-48e762344409" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/AST_getting_started/Java/AST/Visitor/BaseASTVisitor.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/AST_getting_started/Java/AST/Visitor/BaseASTVisitor.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/AST_getting_started/Java/Base/BaseVisitor.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/AST_getting_started/Java/Base/BaseVisitor.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/samples/samples.txt" beforeDir="false" afterPath="$PROJECT_DIR$/samples/samples.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Java/AST/Expr/Expr.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Java/AST/Expr/Expr.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Java/AST/QueryStmt/SelectStmt/SelectCore.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Java/AST/QueryStmt/SelectStmt/SelectCore.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Java/AST/Visitor/BaseASTVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Java/AST/Visitor/BaseASTVisitor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Java/Base/BaseVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Java/Base/BaseVisitor.java" afterDir="false" />
     </list>
@@ -214,7 +210,8 @@
       <workItem from="1593284046396" duration="10015000" />
       <workItem from="1593431003466" duration="6396000" />
       <workItem from="1593511599521" duration="17388000" />
-      <workItem from="1593624966670" duration="14949000" />
+      <workItem from="1593624966670" duration="15419000" />
+      <workItem from="1593688588239" duration="12891000" />
     </task>
     <servers />
   </component>

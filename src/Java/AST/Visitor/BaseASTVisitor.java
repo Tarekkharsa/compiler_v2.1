@@ -34,6 +34,8 @@ import Java.SymbolTable.Scope;
 import Java.SymbolTable.Symbol;
 import Java.SymbolTable.Type;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -54,11 +56,23 @@ public class BaseASTVisitor implements ASTVisitor {
 //
 //            for (int i1 = 0; i1 < Main.symbolTable.getScopes().get(i).getSymbols().size(); i1++) {
 //                System.out.println(Main.symbolTable.getScopes().get(i).getSymbols().get(i1).getName());
+//                System.out.println(Main.symbolTable.getScopes().get(i).getSymbols().get(i1).getType().getName());
 //            }
-////            Main.symbolTable.getScopes().get(i).getSymbolMap().entrySet().forEach(entry->{
-////                System.out.println("Scope ID : "+entry.getKey() + " | Symbol: "+entry.getValue().getName());
-////            });
 //
+//        }
+//        for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
+//            System.out.println("Parent Type Name " + Main.symbolTable.getDeclaredTypes().get(i).getName());
+//
+//            Main.symbolTable.getDeclaredTypes().get(i).getColumns().entrySet().forEach(entry->{
+//                System.out.println("Key : "+entry.getKey() + " | TypeName: "+entry.getValue().getName());
+//
+//            });
+//            System.out.println("===============================");
+//        }
+
+
+//        for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
+//            System.out.println(Main.symbolTable.getDeclaredTypes().get(i).getName());
 //        }
     }
 
@@ -1081,7 +1095,14 @@ public class BaseASTVisitor implements ASTVisitor {
             if(selectCore.getResultColumnList().size() > 1 ){
                 System.err.println("IN Clause if return more than one column");
             }
+//            for (int i = 0; i < selectCore.getScope().getParent().getSymbols().size(); i++) {
+//
+//            System.out.println(selectCore.getScope().getParent().getSymbols().get(i).getName());
+//            System.out.println(selectCore.getScope().getParent().getSymbols().get(i).getType().getName());
+//            }
         }
+
+
 
 
 
@@ -1161,7 +1182,24 @@ public class BaseASTVisitor implements ASTVisitor {
         }
 
         if (expr.getColumnName() != null) {
-//            System.out.println("Expr : "+expr.getColumnName());
+            if (WhereIN ) {
+//            System.out.println(tableName+expr.getColumnName());
+                for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
+                    String name = Main.symbolTable.getDeclaredTypes().get(i).getName();
+                    Main.symbolTable.getDeclaredTypes().get(i).getColumns().forEach((key, value) -> {
+                        if (key.equals(expr.getColumnName()) && name.equals(tableName) ) {
+                        System.out.println(key);
+                        System.out.println(value.getName());
+
+                        }
+
+                    });
+
+                }
+
+
+            }
+
 
         }
 
@@ -1190,8 +1228,15 @@ public class BaseASTVisitor implements ASTVisitor {
             }
         }
 
-        if (expr.getTableName() != null && expr.getColumnName() !=null) {
-            checkColInTable(expr.getColumnName() , expr.getTableName());
+        if ( expr.getColumnName() !=null && tableName != null) {
+
+            if(Main.symbolTable.getDeclaredTypes().size() > 0){
+                for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
+                    if (Main.symbolTable.getDeclaredTypes().get(i).getName().equals(tableName)) {
+                    checkColInTable(expr.getColumnName() , tableName);//////////// test
+                    }
+                }
+            }
         }
 
 
@@ -1513,7 +1558,7 @@ public class BaseASTVisitor implements ASTVisitor {
 //            ResultColumn = true;
         }
         if (resultColumn.getExpr() != null) {
-                printExprResultColumn(resultColumn.getExpr());
+//                printExprResultColumn(resultColumn.getExpr());
                 printExpr(resultColumn.getExpr());
         }
 

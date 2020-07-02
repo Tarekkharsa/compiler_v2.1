@@ -1,1 +1,12 @@
-select xx from tt where x IN(select qq from y);
+
+create table Address (
+name string
+);
+
+create table users (
+id number ,
+name string,
+address number
+);
+
+select name,id from users where address IN(select name from Address);

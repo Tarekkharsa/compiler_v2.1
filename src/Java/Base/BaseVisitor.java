@@ -390,6 +390,7 @@ public class BaseVisitor extends SQLBaseVisitor {
             symbol.setScope(Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1));
             Type symbolType  =new Type();
             symbolType.setName("columnName");
+
             symbol.setType(symbolType);
             Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1)
                     .setSymbol(symbol);
@@ -990,6 +991,7 @@ public class BaseVisitor extends SQLBaseVisitor {
      */
     @Override
     public TableOrSubQuery visitTable_or_subquery(SQLParser.Table_or_subqueryContext ctx) {
+
 
         Type symbolType = new Type();
         TableOrSubQuery tableOrSubQuery = new TableOrSubQuery();
