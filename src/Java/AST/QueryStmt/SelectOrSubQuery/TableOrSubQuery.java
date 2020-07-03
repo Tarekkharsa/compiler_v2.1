@@ -1,10 +1,11 @@
 package Java.AST.QueryStmt.SelectOrSubQuery;
 
+import Java.AST.Node;
 import Java.AST.QueryStmt.JoinClause;
 
 import java.util.List;
 
-public class TableOrSubQuery {
+public class TableOrSubQuery extends Node {
     private String dataBaseName;
     private String tableName;
     private String indexName;

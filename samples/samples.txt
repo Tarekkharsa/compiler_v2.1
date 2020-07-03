@@ -1,12 +1,6 @@
-
-create table Address (
-name string
-);
-
-create table users (
-id number ,
-name string,
-address number
-);
-
-select name,id from users where address IN(select name from Address);
+SELECT COUNT(Id), Country
+  FROM Customer
+ WHERE Country <> 'USA'
+ GROUP BY Count(Country)
+HAVING COUNT(Id) >= 9
+ ORDER BY COUNT(Id) DESC

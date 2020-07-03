@@ -21,10 +21,7 @@ import Java.AST.QueryStmt.DeleteStatement.QualifiedTableName;
 import Java.AST.QueryStmt.SelectOrSubQuery.ResultColumn;
 import Java.AST.QueryStmt.SelectOrSubQuery.SelectOrValues;
 import Java.AST.QueryStmt.SelectOrSubQuery.TableOrSubQuery;
-import Java.AST.QueryStmt.SelectStmt.FactoredSelectStmt;
-import Java.AST.QueryStmt.SelectStmt.OrderingTerm;
-import Java.AST.QueryStmt.SelectStmt.SelectCore;
-import Java.AST.QueryStmt.SelectStmt.SelectStmt;
+import Java.AST.QueryStmt.SelectStmt.*;
 import Java.Main;
 import Java.SymbolTable.CreateType;
 import Java.SymbolTable.Scope;
@@ -328,6 +325,9 @@ public class BaseVisitor extends SQLBaseVisitor {
         if (ctx.K_FROM() != null) {
             selectOrValues.setFrom(ctx.K_FROM().getSymbol().getText());
         }
+        if(ctx.having() != null ){
+            selectOrValues.setHaving(visitHaving(ctx.having()));
+        }
         return selectOrValues;
     }
 
@@ -404,6 +404,7 @@ public class BaseVisitor extends SQLBaseVisitor {
         }
         if (ctx.function_name() != null) {
             expr.setFunctionName(ctx.function_name().any_name().getText());
+
         }
         if (ctx.K_IN() != null) {
             expr.setK_IN(ctx.K_IN().getSymbol().getText());
@@ -520,6 +521,9 @@ public class BaseVisitor extends SQLBaseVisitor {
         if (ctx.inline_condition_stmt() != null && !ctx.inline_condition_stmt().isEmpty()) {
             expr.setInline_condition_stmt(visitInline_condition_stmt(ctx.inline_condition_stmt()));
         }
+
+        expr.setLine(ctx.getStart().getLine());
+        expr.setCol(ctx.getStart().getCharPositionInLine()); //
 
         return expr;
     }
@@ -1034,6 +1038,8 @@ public class BaseVisitor extends SQLBaseVisitor {
             tableOrSubQuery.setSelectOrValues(visitSelect_or_values(ctx.select_stmt().select_or_values()));
         }
 
+        tableOrSubQuery.setLine(ctx.getStart().getLine());
+        tableOrSubQuery.setCol(ctx.getStart().getCharPositionInLine()); //
 
         return tableOrSubQuery;
     }
@@ -1935,18 +1941,18 @@ public class BaseVisitor extends SQLBaseVisitor {
         if (ctx.K_ALL() != null) {
             selectCore.setAll(ctx.K_ALL().getSymbol().getText());
         }
-        if (ctx.K_BY() != null) {
-            selectCore.setBy(ctx.K_BY().getSymbol().getText());
-        }
+
         if (ctx.K_DISTINCT() != null) {
             selectCore.setDISTINCT(ctx.K_DISTINCT().getSymbol().getText());
         }
-        if (ctx.K_GROUP() != null) {
-            selectCore.setGROUP(ctx.K_GROUP().getSymbol().getText());
+        if(ctx.groupBy() != null){
+
         }
-        if (ctx.K_HAVING() != null) {
-            selectCore.setHAVING(ctx.K_HAVING().getSymbol().getText());
+        if (ctx.having() != null) {
+
+            selectCore.setHAVING(visitHaving(ctx.having()));
         }
+
         if (ctx.K_SELECT() != null) {
             selectCore.setSELECT(ctx.K_SELECT().getSymbol().getText());
         }
@@ -1964,10 +1970,42 @@ public class BaseVisitor extends SQLBaseVisitor {
             selectCore.setExprs(exprs);
         }
 
+
+        selectCore.setLine(ctx.getStart().getLine()); //get line number
+        selectCore.setCol(ctx.getStart().getCharPositionInLine()); // get col number
+
         return selectCore;
     }
 ////////////////////////////////////////////////////////////////////////////////////
 
+
+    @Override
+    public GroupBy visitGroupBy(SQLParser.GroupByContext ctx) {
+        GroupBy groupBy = new GroupBy();
+
+        if (ctx.K_BY() != null) {
+            groupBy.setBy(ctx.K_BY().getSymbol().getText());
+        }
+        if (ctx.K_GROUP() != null) {
+            groupBy.setGROUP(ctx.K_GROUP().getSymbol().getText());
+        }
+        if (ctx.expr() != null) {
+            groupBy.setExpr(visitExpr(ctx.expr()));
+        }
+        return groupBy;
+    }
+
+    @Override
+    public Having visitHaving(SQLParser.HavingContext ctx) {
+        Having having = new Having();
+        if (ctx.K_HAVING() != null) {
+            having.setK_Having(ctx.K_HAVING().getSymbol().getText());
+        }
+        if(ctx.expr() != null ){
+            having.setExpr(visitExpr(ctx.expr()));
+        }
+        return having;
+    }
 
     // body
     @Override

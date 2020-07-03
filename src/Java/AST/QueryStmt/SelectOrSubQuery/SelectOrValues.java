@@ -2,6 +2,7 @@ package Java.AST.QueryStmt.SelectOrSubQuery;
 
 import Java.AST.Expr.Expr;
 import Java.AST.QueryStmt.JoinClause;
+import Java.AST.QueryStmt.SelectStmt.Having;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,15 @@ public class SelectOrValues {
     private JoinClause joinClause;
     List<Expr> expr = new ArrayList<>();
     private String From;
+    Having having;
+
+    public Having getHaving() {
+        return having;
+    }
+
+    public void setHaving(Having having) {
+        this.having = having;
+    }
 
     public String getFrom() {
         return From;

@@ -425,6 +425,18 @@ public interface SQLVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSelect_core(SQLParser.Select_coreContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link SQLParser#groupBy}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGroupBy(SQLParser.GroupByContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#having}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitHaving(SQLParser.HavingContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link SQLParser#cte_table_name}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

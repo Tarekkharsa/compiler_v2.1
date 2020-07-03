@@ -1,6 +1,7 @@
 package Java.AST.QueryStmt.SelectStmt;
 
 import Java.AST.Expr.Expr;
+import Java.AST.Node;
 import Java.AST.QueryStmt.JoinClause;
 import Java.AST.QueryStmt.SelectOrSubQuery.ResultColumn;
 import Java.AST.QueryStmt.SelectOrSubQuery.TableOrSubQuery;
@@ -9,7 +10,7 @@ import Java.SymbolTable.Scope;
 
 import java.util.List;
 
-public class SelectCore   {
+public class SelectCore extends Node {
         private  List<ResultColumn> resultColumnList;
         private List<Expr> exprs;
         private List<TableOrSubQuery> tableOrSubQueries;
@@ -17,14 +18,21 @@ public class SelectCore   {
         private String from;
 
     private String All;
-    private String By;
     private String DISTINCT;
-    private String GROUP;
-    private String HAVING;
+    GroupBy groupBy;
+    private Having HAVING;
     private String SELECT;
     private String VALUES;
     private String Where;
     private Scope scope;
+
+    public GroupBy getGroupBy() {
+        return groupBy;
+    }
+
+    public void setGroupBy(GroupBy groupBy) {
+        this.groupBy = groupBy;
+    }
 
     public Scope getScope() {
         return scope;
@@ -42,13 +50,7 @@ public class SelectCore   {
         All = all;
     }
 
-    public String getBy() {
-        return By;
-    }
 
-    public void setBy(String by) {
-        By = by;
-    }
 
     public String getDISTINCT() {
         return DISTINCT;
@@ -58,19 +60,13 @@ public class SelectCore   {
         this.DISTINCT = DISTINCT;
     }
 
-    public String getGROUP() {
-        return GROUP;
-    }
 
-    public void setGROUP(String GROUP) {
-        this.GROUP = GROUP;
-    }
 
-    public String getHAVING() {
+    public Having getHAVING() {
         return HAVING;
     }
 
-    public void setHAVING(String HAVING) {
+    public void setHAVING(Having HAVING) {
         this.HAVING = HAVING;
     }
 

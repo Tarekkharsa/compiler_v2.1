@@ -1,13 +1,14 @@
 package Java.AST.Expr;
 
 import Java.AST.Function.If_stmt.Inline_condition_stmt;
+import Java.AST.Node;
 import Java.AST.QueryStmt.SelectStmt.SelectStmt;
 import Java.AST.QueryStmt.SignedNumber;
 import Java.AST.QueryStmt.Statement;
 
 import java.util.List;
 
-public class Expr {
+public class Expr extends Node {
     private String databaseName;
     private String tableName;
     private String K_IN;

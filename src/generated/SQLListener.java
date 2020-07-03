@@ -698,6 +698,26 @@ public interface SQLListener extends ParseTreeListener {
 	 */
 	void exitSelect_core(SQLParser.Select_coreContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link SQLParser#groupBy}.
+	 * @param ctx the parse tree
+	 */
+	void enterGroupBy(SQLParser.GroupByContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#groupBy}.
+	 * @param ctx the parse tree
+	 */
+	void exitGroupBy(SQLParser.GroupByContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#having}.
+	 * @param ctx the parse tree
+	 */
+	void enterHaving(SQLParser.HavingContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#having}.
+	 * @param ctx the parse tree
+	 */
+	void exitHaving(SQLParser.HavingContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link SQLParser#cte_table_name}.
 	 * @param ctx the parse tree
 	 */

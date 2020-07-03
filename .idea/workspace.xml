@@ -3,9 +3,22 @@
   <component name="ChangeListManager">
     <list default="true" id="57616b6f-dc0e-4c54-9253-48e762344409" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/AST_getting_started/Java/AST/Expr/Expr.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/AST_getting_started/Java/AST/Expr/Expr.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/AST_getting_started/Java/AST/QueryStmt/SelectStmt/SelectCore.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/AST_getting_started/Java/AST/QueryStmt/SelectStmt/SelectCore.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/samples/samples.txt" beforeDir="false" afterPath="$PROJECT_DIR$/samples/samples.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Java/AST/Expr/Expr.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Java/AST/Expr/Expr.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Java/AST/QueryStmt/SelectOrSubQuery/SelectOrValues.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Java/AST/QueryStmt/SelectOrSubQuery/SelectOrValues.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Java/AST/QueryStmt/SelectOrSubQuery/TableOrSubQuery.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Java/AST/QueryStmt/SelectOrSubQuery/TableOrSubQuery.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Java/AST/QueryStmt/SelectStmt/SelectCore.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Java/AST/QueryStmt/SelectStmt/SelectCore.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Java/AST/Visitor/BaseASTVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Java/AST/Visitor/BaseASTVisitor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Java/Base/BaseVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Java/Base/BaseVisitor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SQL.g4" beforeDir="false" afterPath="$PROJECT_DIR$/src/SQL.g4" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/generated/SQL.interp" beforeDir="false" afterPath="$PROJECT_DIR$/src/generated/SQL.interp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/generated/SQLBaseListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/generated/SQLBaseListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/generated/SQLBaseVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/generated/SQLBaseVisitor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/generated/SQLListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/generated/SQLListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/generated/SQLParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/generated/SQLParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/generated/SQLVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/generated/SQLVisitor.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -212,6 +225,7 @@
       <workItem from="1593511599521" duration="17388000" />
       <workItem from="1593624966670" duration="15419000" />
       <workItem from="1593688588239" duration="12891000" />
+      <workItem from="1593773646358" duration="15007000" />
     </task>
     <servers />
   </component>
