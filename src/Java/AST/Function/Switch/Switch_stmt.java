@@ -1,8 +1,10 @@
 package Java.AST.Function.Switch;
 
+import Java.AST.Expr.LiteralValue;
 import Java.AST.Function.Body;
 import Java.AST.QueryStmt.AnyName;
 import Java.AST.QueryStmt.SignedNumber;
+import Java.SymbolTable.Scope;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,12 +12,39 @@ import java.util.List;
 public class Switch_stmt {
     private String name;
     private List<AnyName> anyNames;
+    private AnyName anyName;
     private List<SignedNumber> signedNumbers;
+    private List<LiteralValue> literalValues;
     private List<Body> body_swich;
     private String K_Switch;
     private String K_Case;
     private String K_Default;
     private String K_Break;
+    private Scope currentScope;
+
+    public AnyName getAnyName() {
+        return anyName;
+    }
+
+    public void setAnyName(AnyName anyName) {
+        this.anyName = anyName;
+    }
+
+    public Scope getCurrentScope() {
+        return currentScope;
+    }
+
+    public void setCurrentScope(Scope currentScope) {
+        this.currentScope = currentScope;
+    }
+
+    public List<LiteralValue> getLiteralValues() {
+        return literalValues;
+    }
+
+    public void setLiteralValues(List<LiteralValue> literalValues) {
+        this.literalValues = literalValues;
+    }
 
     public String getName() {
         return name;

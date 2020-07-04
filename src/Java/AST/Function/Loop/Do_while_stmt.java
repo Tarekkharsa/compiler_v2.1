@@ -1,12 +1,22 @@
 package Java.AST.Function.Loop;
 
 import Java.AST.Function.Body;
+import Java.SymbolTable.Scope;
 
 public class Do_while_stmt {
 
     private Body body_do_while;
     private While_do_stmt While_do;
     private String K_do;
+    private Scope currentScope;
+
+    public Scope getCurrentScope() {
+        return currentScope;
+    }
+
+    public void setCurrentScope(Scope currentScope) {
+        this.currentScope = currentScope;
+    }
 
     public String getK_do() {
         return K_do;

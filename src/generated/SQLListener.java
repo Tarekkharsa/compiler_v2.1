@@ -498,6 +498,16 @@ public interface SQLListener extends ParseTreeListener {
 	 */
 	void exitExpr_for_and_operator(SQLParser.Expr_for_and_operatorContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link SQLParser#expr_var_init}.
+	 * @param ctx the parse tree
+	 */
+	void enterExpr_var_init(SQLParser.Expr_var_initContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#expr_var_init}.
+	 * @param ctx the parse tree
+	 */
+	void exitExpr_var_init(SQLParser.Expr_var_initContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link SQLParser#expr_print}.
 	 * @param ctx the parse tree
 	 */

@@ -1,13 +1,14 @@
 package Java.AST.Expr;
 
 import Java.AST.Function.Json.Call_json;
+import Java.AST.Node;
 import Java.AST.QueryStmt.AnyName;
 import Java.AST.QueryStmt.SignedNumber;
 import Java.AST.QueryStmt.TypeName;
 
 import java.util.List;
 
-public class Expr_if {
+public class Expr_if  extends Node {
 
     private LiteralValue literalValue;
     private List<AnyName> anyNames;

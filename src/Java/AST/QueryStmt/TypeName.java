@@ -1,8 +1,10 @@
 package Java.AST.QueryStmt;
 
+import Java.AST.Node;
+
 import java.util.List;
 
-public class TypeName {
+public class TypeName extends Node {
     private String name;
     private List<SignedNumber> signedNumbers ;
     private List<AnyName> anyNames;

@@ -26,58 +26,34 @@ import Java.AST.QueryStmt.SelectOrSubQuery.SelectOrValues;
 import Java.AST.QueryStmt.SelectOrSubQuery.TableOrSubQuery;
 import Java.AST.QueryStmt.SelectStmt.*;
 import Java.Main;
-import Java.SymbolTable.CreateType;
-import Java.SymbolTable.Scope;
-import Java.SymbolTable.Symbol;
-import Java.SymbolTable.Type;
+import Java.SymbolTable.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BaseASTVisitor implements ASTVisitor {
-    Scope parentScope;
+    private Scope currentScope;
+    private String varName;
+    private String varType;
+
     @Override
     public void visit(Parse p) {
 //        System.out.println("ast parse ");
         for (Statement sqlStmt : p.getSqlStmts()) {
             visit(sqlStmt);
         }
-//        System.out.println("line number "+p.getLine());
-//        System.out.println("Col number "+p.getCol());
 
-//        System.out.println("Symbol table Select Core"  );
-//        for (int i = 0; i < Main.symbolTable.getScopes().size(); i++) {
-//            System.out.println("Parent Scop Name " + Main.symbolTable.getScopes().get(i).getId());
-//
-//            for (int i1 = 0; i1 < Main.symbolTable.getScopes().get(i).getSymbols().size(); i1++) {
-//                System.out.println(Main.symbolTable.getScopes().get(i).getSymbols().get(i1).getName());
-//                System.out.println(Main.symbolTable.getScopes().get(i).getSymbols().get(i1).getType().getName());
-//            }
-//
-//        }
-//        for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
-//            System.out.println("Parent Type Name " + Main.symbolTable.getDeclaredTypes().get(i).getName());
-//
-//            Main.symbolTable.getDeclaredTypes().get(i).getColumns().entrySet().forEach(entry->{
-//                System.out.println("Key : "+entry.getKey() + " | TypeName: "+entry.getValue().getName());
-//
-//            });
-//            System.out.println("===============================");
-//        }
-
-
-//        for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
-//            System.out.println(Main.symbolTable.getDeclaredTypes().get(i).getName());
-//        }
     }
 
     @Override
     public void visit(DefAllObject defAllObject) {
 //        System.out.println("--------------------------------------");
 //        System.out.println("ast DefAllObject ");
-        if (defAllObject.getFunctionDeclarations() != null ) {
+        if (defAllObject.getFunctionDeclarations() != null) {
             printFunctionDeclarations(defAllObject.getFunctionDeclarations());
         }
-        if (defAllObject.getJson_stmt() != null ) {
+        if (defAllObject.getJson_stmt() != null) {
             printJsonStmt(defAllObject.getJson_stmt());
         }
         if (defAllObject.getVar_get_func() != null) {
@@ -94,7 +70,6 @@ public class BaseASTVisitor implements ASTVisitor {
         }
 
 
-
     }
 
     private void printDefFunctionDefaultValue(DefFunctionDefaultValue def_function_default_value) {
@@ -103,7 +78,7 @@ public class BaseASTVisitor implements ASTVisitor {
 //            System.out.println(def_function_default_value.getK_function());
         }
         if (def_function_default_value.getAnyName() != null) {
-                printAnyName(def_function_default_value.getAnyName());
+            printAnyName(def_function_default_value.getAnyName());
         }
         if (def_function_default_value.getK_var() != null) {
             for (int i = 0; i < def_function_default_value.getK_var().size(); i++) {
@@ -122,15 +97,41 @@ public class BaseASTVisitor implements ASTVisitor {
 
 
     private void printFuncArgumentList(Func_argument_list funcArgumentList) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast funcArgumentList ");
-        if (funcArgumentList.getK_function() != null) {
-//            System.out.println(funcArgumentList.getK_function());
+        if (funcArgumentList.getCurrentScope() != null){
+            currentScope = funcArgumentList.getCurrentScope();
         }
-        if (funcArgumentList.getAnyNames() != null) {
-            for (int i = 0; i < funcArgumentList.getAnyNames().size(); i++) {
-            printAnyName(funcArgumentList.getAnyNames().get(i));
 
+        if (funcArgumentList.getAnyNames() != null) {
+            boolean funcIsExist = false;
+            String funcName = "";
+            Scope funcScope = new Scope();
+
+            for (int i = 0; i < funcArgumentList.getAnyNames().size(); i++) {
+                if (i == 0){ // this is a func name
+                    funcName = funcArgumentList.getAnyNames().get(i).getIDENTIFIER();
+                    for (Scope scope : Main.symbolTable.getScopes()) {
+                        if (scope.getTypeName().equals(Scope.FUNCTION)){
+                            if (funcName.equals(scope.getFuncName())){
+                                funcIsExist = true;
+                                funcScope = scope;
+                            }
+                        }
+                    }
+                }
+                else {
+                    List<Symbol> symbols = new ArrayList<>();
+                    printAnyNameExprIfAndJavaOther(funcArgumentList.getAnyNames().get(i),false,symbols ,funcArgumentList.getLine());
+                }
+            }
+
+            if (!funcIsExist){
+                System.err.println("Error in line: "+funcArgumentList.getLine()+" "+funcName+" function is not found");
+            }
+            else { // we will check params number
+                int numOfParams = funcScope.getNumOfFuncParams();
+                if (numOfParams != funcArgumentList.getAnyNames().size() -1){
+                    System.err.println("Error in line: "+funcArgumentList.getLine()+" "+funcName+" params invalid");
+                }
             }
         }
     }
@@ -175,7 +176,7 @@ public class BaseASTVisitor implements ASTVisitor {
         }
         if (var_get_func.getAny_name() != null) {
             for (int i = 0; i < var_get_func.getAny_name().size(); i++) {
-            printAnyName(var_get_func.getAny_name().get(i));
+                printAnyName(var_get_func.getAny_name().get(i));
 
             }
         }
@@ -198,7 +199,7 @@ public class BaseASTVisitor implements ASTVisitor {
         }
         if (json_stmt.getJson_arrays() != null) {
             for (int i = 0; i < json_stmt.getJson_arrays().size(); i++) {
-            printJsonArrays(json_stmt.getJson_arrays().get(i));
+                printJsonArrays(json_stmt.getJson_arrays().get(i));
             }
         }
         if (json_stmt.getJson_attributes() != null) {
@@ -305,7 +306,7 @@ public class BaseASTVisitor implements ASTVisitor {
 //        System.out.println("ast Body");
         if (body.getVarInits() != null) {
             for (int i = 0; i < body.getVarInits().size(); i++) {
-            printVarInits(body.getVarInits().get(i));
+                printVarInits(body.getVarInits().get(i));
             }
         }
         if (body.getArray_stmt() != null) {
@@ -386,7 +387,7 @@ public class BaseASTVisitor implements ASTVisitor {
         }
         if (body.getwhile_stmt() != null) {
             for (int i = 0; i < body.getwhile_stmt().size(); i++) {
-                printwhileStmt(body.getwhile_stmt().get(i));
+                printWhileStmt(body.getwhile_stmt().get(i));
             }
         }
         if (body.getStatements() != null) {
@@ -409,19 +410,21 @@ public class BaseASTVisitor implements ASTVisitor {
 //        ////////////////not Completed
 //    }
 
-    private void printwhileStmt(While_stmt while_stmt) {
+    private void printWhileStmt(While_stmt while_stmt) {
 
-        if (while_stmt.getParentScope() != null){
-            parentScope = while_stmt.getParentScope();
+        if (while_stmt.getCurrentScope() != null) {
+            currentScope = while_stmt.getCurrentScope();
         }
 
         if (while_stmt.getK_while() != null) {
 //            System.out.println(while_stmt.getK_while());
         }
         if (while_stmt.getExpr_whileList() != null) {
+            List<Symbol> symbols = new ArrayList<>();
             for (int i = 0; i < while_stmt.getExpr_whileList().size(); i++) {
-                printExprWhile(while_stmt.getExpr_whileList().get(i));
+                ScopeChecker scopeChecker = printExprWhile(while_stmt.getExpr_whileList().get(i),new ScopeChecker(),symbols);
             }
+            checkTypeOfExpr(symbols);
         }
 
         if (while_stmt.getBody_while() != null) {
@@ -434,27 +437,43 @@ public class BaseASTVisitor implements ASTVisitor {
     private void printVarOperator(Var_operator var_operator) {
 //        System.out.println("--------------------------------------");
 //        System.out.println("ast var_operator");
+
         if (var_operator.getExpr_for_and_operator() != null) {
-            printExprForAndOperator(var_operator.getExpr_for_and_operator());
+            printExprForAndOperator(var_operator.getExpr_for_and_operator(),false);
         }
     }
 
     private void printSwitchStmt(Switch_stmt switch_stmt) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast switch_stmt");
-        if (switch_stmt.getName() != null) {
+        ScopeChecker scopeChecker = new ScopeChecker();
+        if (switch_stmt.getCurrentScope() != null){
+            currentScope = switch_stmt.getCurrentScope();
+        }
 
-        }
-        if (switch_stmt.getK_Switch() != null) {
-//            System.out.println(switch_stmt.getK_Switch());
-        }
         if (switch_stmt.getAnyNames() != null) {
             for (int i = 0; i < switch_stmt.getAnyNames().size(); i++) {
-                printAnyName(switch_stmt.getAnyNames().get(i));
+                // 0 is index of anyName switch(anyName), so we will check if it was init
+                if (i == 0) {
+                    scopeChecker = printAnyNameExprIfAndJavaOther(switch_stmt.getAnyNames().get(i),false,new ArrayList<>(),0);
+                }
+                else{
+                    System.err.println("Error in line: " +switch_stmt.getAnyNames().get(i).getLine()+" "+switch_stmt.getAnyNames().get(i).getIDENTIFIER()+" is not permitted");
+                    printAnyName(switch_stmt.getAnyNames().get(i));
+                }
             }
         }
-        if (switch_stmt.getK_Case() != null) {
-//            System.out.println(switch_stmt.getK_Case());
+
+        if (switch_stmt.getLiteralValues() != null) {
+            for (int i = 0; i < switch_stmt.getLiteralValues().size(); i++) {
+                printLiteralValue(switch_stmt.getLiteralValues().get(i));
+
+                if (scopeChecker.getSymbol() != null) {
+                    if (scopeChecker.getSymbol().getType() != null) {
+                        if (!scopeChecker.getSymbol().getType().getName().equals(varType)) {
+                            System.err.println("Error in line:" +switch_stmt.getLiteralValues().get(i).getLine()+" "+scopeChecker.getSymbol().getName() + " is another type");
+                        }
+                    }
+                }
+            }
         }
         if (switch_stmt.getSignedNumbers() != null) {
             for (int i = 0; i < switch_stmt.getSignedNumbers().size(); i++) {
@@ -475,19 +494,50 @@ public class BaseASTVisitor implements ASTVisitor {
 
     }
 
-    private void printInlineConditionStmt(Inline_condition_stmt inline_condition_stmt) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast inline_condition_stmt");
-        if (inline_condition_stmt.getExpr() != null) {
-            for (int i = 0; i < inline_condition_stmt.getExpr().size(); i++) {
-            printExpr(inline_condition_stmt.getExpr().get(i));
+    private void printInlineConditionStmt(Inline_condition_stmt inlineStmt) {
+        if (inlineStmt.getCurrentScope() != null){
+            currentScope = inlineStmt.getCurrentScope();
+        }
+
+        if (inlineStmt.getExpr() != null) {
+            for (int i = 0; i < inlineStmt.getExpr().size(); i++) {
+                List<Symbol> symbols = new ArrayList<>();
+                ScopeChecker scopeChecker = printExprInlineCond(inlineStmt.getExpr().get(i),new ScopeChecker(),symbols);
+
+                checkTypeOfExpr(symbols);
             }
         }
-        if (inline_condition_stmt.getQesM() != null) {
-//            System.out.println(inline_condition_stmt.getQesM());
+
+        if (inlineStmt.getExprForAndOperators() != null) {
+            for (int i = 0; i < inlineStmt.getExprForAndOperators().size(); i++) {
+                printExprForAndOperator(inlineStmt.getExprForAndOperators().get(i),false);
+            }
         }
-        if (inline_condition_stmt.getOrM() != null) {
-//            System.out.println(inline_condition_stmt.getOrM());
+
+        if (inlineStmt.getExprIf() != null) {
+            List<Symbol> symbols = new ArrayList<>();
+            ScopeChecker scopeChecker = printExprIf(inlineStmt.getExprIf(), false, new ScopeChecker(), symbols);
+
+            checkTypeOfExpr(symbols);
+        }
+
+//        if (inlineStmt.getExprIf() != null) {
+//            List<Symbol> symbols = new ArrayList<>();
+//            for (int i = 0; i < inlineStmt.getExprIf().getExpr_ifs().size(); i++) {
+//                ScopeChecker scopeChecker = printExprIf(inlineStmt.getExprIf().getExpr_ifs().get(i),false, new ScopeChecker());
+//
+//                if (scopeChecker.getSymbol() != null)
+//                    symbols.add(scopeChecker.getSymbol());
+//            }
+//
+//            checkTypeOfExpr(symbols);
+//        }
+
+        if (inlineStmt.getQesM() != null) {
+//            System.out.println(inlineStmt.getQesM());
+        }
+        if (inlineStmt.getOrM() != null) {
+//            System.out.println(inlineStmt.getOrM());
         }
     }
 
@@ -495,24 +545,32 @@ public class BaseASTVisitor implements ASTVisitor {
 //        System.out.println("--------------------------------------");
 //        System.out.println("ast if_stmt");
 
-        if (if_stmt.getParentScope() != null){
-            parentScope = if_stmt.getParentScope();
+        if (if_stmt.getCurrentScope() != null) {
+            currentScope = if_stmt.getCurrentScope();
         }
 
         if (if_stmt.getK_if() != null) {
 //            System.out.println(if_stmt.getK_if());
         }
         if (if_stmt.getExpr_ifs() != null) {
+            List<Symbol> symbols = new ArrayList<>();
             for (int i = 0; i < if_stmt.getExpr_ifs().size(); i++) {
-                printExprIf(if_stmt.getExpr_ifs().get(i));
+
+                ScopeChecker scopeChecker = printExprIf(if_stmt.getExpr_ifs().get(i), false,new ScopeChecker(),symbols);
+
+//                if (scopeChecker.getSymbol() != null)
+//                    symbols.add(scopeChecker.getSymbol());
             }
+
+            checkTypeOfExpr(symbols);
+
         }
         if (if_stmt.getBody_if() != null) {
             printBody(if_stmt.getBody_if());
         }
         if (if_stmt.getElse_ifList() != null) {
             for (int i = 0; i < if_stmt.getElse_ifList().size(); i++) {
-            printElseIfList(if_stmt.getElse_ifList().get(i));
+                printElseIfList(if_stmt.getElse_ifList().get(i));
             }
         }
         if (if_stmt.getElsee() != null) {
@@ -520,7 +578,35 @@ public class BaseASTVisitor implements ASTVisitor {
         }
     }
 
+    private void checkTypeOfExpr(List<Symbol> symbols){
+        // check this if(x == 15) and x is a string or number
 
+//        if (!varType.isEmpty() && symbols.size() == 1) {
+//            System.out.println("enter "+varType);
+//            if (symbols.get(0).getType() != null) {
+//                if (!symbols.get(0).getType().getName()
+//                        .equals(varType)) {
+//                    System.err.println("Type of first var doesn't equal type of second var");
+//                    varType = "";
+//                }
+//            }
+//        }else {  // check this if(x == y) and x is a string and y is a number
+        if (symbols.size() > 1) {
+            for (int i = 0; i < symbols.size(); i++) {
+                if (i + 1 < symbols.size()) {
+                    if (symbols.get(0).getType() != null && symbols.get(i + 1).getType() != null) {
+                        if (!symbols.get(0).getType().getName().
+                                equals(symbols.get(i + 1)
+                                        .getType().getName())) {
+                            System.err.println("Type of first var doesn't equal type of second var");
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+//        }
+    }
 
     private void printElse(Else elsee) {
 //        System.out.println("--------------------------------------");
@@ -529,30 +615,46 @@ public class BaseASTVisitor implements ASTVisitor {
 //            System.out.println(elsee.getK_else());
         }
         if (elsee.getBody() != null) {
-        printBody(elsee.getBody());
+            printBody(elsee.getBody());
         }
     }
 
     private void printElseIfList(Else_if else_if) {
 //        System.out.println("--------------------------------------");
 //        System.out.println("ast else_if");
+        if (else_if.getCurrentScope() != null) {
+            currentScope = else_if.getCurrentScope();
+        }
+
         if (else_if.getK_else() != null) {
 //            System.out.println(else_if.getK_else());
         }
         if (else_if.getK_if() != null) {
 //            System.out.println(else_if.getK_if());
         }
-        if (else_if.getExpr_if() != null) {
-        printExprIf(else_if.getExpr_if());
+        if (else_if.getExpr_ifs() != null) {
+            List<Symbol> symbols = new ArrayList<>();
+            for (int i = 0; i < else_if.getExpr_ifs().size(); i++) {
+                ScopeChecker scopeChecker = printExprIf(else_if.getExpr_ifs().get(i), false,new ScopeChecker(),symbols);
+
+//                if (scopeChecker.getSymbol() != null)
+//                    symbols.add(scopeChecker.getSymbol());
+            }
+
+            checkTypeOfExpr(symbols);
         }
         if (else_if.getBody() != null) {
-        printBody(else_if.getBody());
+            printBody(else_if.getBody());
         }
     }
 
     private void printForStmt(For_stmt for_stmt) {
 //        System.out.println("--------------------------------------");
 //        System.out.println("ast for_stmt");
+        if (for_stmt.getCurrentScope() != null) {
+            currentScope = for_stmt.getCurrentScope();
+        }
+
         if (for_stmt.getK_for() != null) {
 //            System.out.println(for_stmt.getK_for());
         }
@@ -563,33 +665,51 @@ public class BaseASTVisitor implements ASTVisitor {
             printForeachRule(for_stmt.getForeach_rule());
         }
         if (for_stmt.getBody_for() != null) {
-        printBody(for_stmt.getBody_for());
+            printBody(for_stmt.getBody_for());
         }
     }
 
     private void printForRule(For_rule for_rule) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast for_rule");
         if (for_rule.getK_var() != null) {
 //            System.out.println(for_rule.getK_var());
         }
+
         if (for_rule.getExpr_for_and_operators() != null) {
             for (int i = 0; i < for_rule.getExpr_for_and_operators().size(); i++) {
-             printExprForAndOperator(for_rule.getExpr_for_and_operators().get(i));
+                if (i == 0 && for_rule.getK_var() != null){
+                    printExprForAndOperator(for_rule.getExpr_for_and_operators().get(i),true);
+                }else {
+                    printExprForAndOperator(for_rule.getExpr_for_and_operators().get(i),false);
+                }
+
             }
+        }
+        if (for_rule.getExpr_if() != null) {
+            List<Symbol> symbols = new ArrayList<>();
+
+            ScopeChecker scopeChecker = printExprIf(for_rule.getExpr_if(), true,new ScopeChecker(),symbols);
+
+            if (scopeChecker.getSymbol() != null) {
+                if (scopeChecker.isFound() && !scopeChecker.isAssigned()) {
+                    System.err.println("Warning in line: "+for_rule.getExpr_if().getLine()+" " + scopeChecker.getSymbol().getName() + " is never assigned");
+                }
+            }
+
+            checkTypeOfExpr(symbols);
         }
 
     }
 
     private void printForeachRule(Foreach_rule foreach_rule) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast foreach_rule");
         if (foreach_rule.getK_var() != null) {
-//            System.out.println(foreach_rule.getK_var());
         }
         if (foreach_rule.getAnyNames() != null) {
             for (int i = 0; i < foreach_rule.getAnyNames().size(); i++) {
-                printAnyName(foreach_rule.getAnyNames().get(i));
+                if (i == 1){
+                    printAnyNameExprIfAndJavaOther(foreach_rule.getAnyNames().get(i),false,new ArrayList<>(),foreach_rule.getLine());
+                }else {
+                    printAnyName(foreach_rule.getAnyNames().get(i));
+                }
             }
         }
     }
@@ -611,7 +731,7 @@ public class BaseASTVisitor implements ASTVisitor {
 //            System.out.println(edit_json.getAssin());
         }
         if (edit_json.getSignedNumber() != null) {
-        printSignedNumbers(edit_json.getSignedNumber());
+            printSignedNumbers(edit_json.getSignedNumber());
         }
         if (edit_json.getExpr() != null) {
             printExpr(edit_json.getExpr());
@@ -639,9 +759,26 @@ public class BaseASTVisitor implements ASTVisitor {
         if (while_do.getK_while() != null) {
 //            System.out.println(while_do.getK_while());
         }
-        if (while_do.getExpr_while() != null) {
-        printExprWhile(while_do.getExpr_while());
+
+        if (while_do.getExpr_while().getExpr_while() != null) {
+            List<Symbol> symbols = new ArrayList<>();
+
+            ScopeChecker scopeChecker = printExprWhile(while_do.getExpr_while(), new ScopeChecker(),symbols);
+
+            checkTypeOfExpr(symbols);
         }
+
+//        if (while_do.getExpr_while().getExpr_while() != null) {
+//            List<Symbol> symbols = new ArrayList<>();
+//            for (int i = 0; i < while_do.getExpr_while().getExpr_while().size(); i++) {
+//                ScopeChecker scopeChecker = printExprWhile(while_do.getExpr_while().getExpr_while().get(i), new ScopeChecker(),symbols);
+//
+//                if (scopeChecker.getSymbol() != null){
+//                    symbols.add(scopeChecker.getSymbol());
+//                }
+//            }
+//            checkTypeOfExpr(symbols);
+//        }
     }
 
     private void printDefPrintStmt(Def_print_stmt def_print_stmt) {
@@ -665,7 +802,7 @@ public class BaseASTVisitor implements ASTVisitor {
         }
         if (print_body.getExpr_prints() != null) {
             for (int i = 0; i < print_body.getExpr_prints().size(); i++) {
-            printExpr(print_body.getExpr_prints().get(i));
+                printExpr(print_body.getExpr_prints().get(i));
 
             }
         }
@@ -700,7 +837,7 @@ public class BaseASTVisitor implements ASTVisitor {
         }
         if (array_stmt.getSql_stmt_list() != null) {
             for (int i = 0; i < array_stmt.getSql_stmt_list().size(); i++) {
-            visit(array_stmt.getSql_stmt_list().get(i));
+                visit(array_stmt.getSql_stmt_list().get(i));
 
             }
         }
@@ -710,20 +847,22 @@ public class BaseASTVisitor implements ASTVisitor {
     private void printVarInits(VarInit varInit) {
 //        System.out.println("--------------------------------------");
 //        System.out.println("ast VarInit");
+        Symbol varSymbol = new Symbol();
+        if (varInit.getCurrentScope() != null){
+            currentScope = varInit.getCurrentScope();
+        }
+
         if (varInit.getK_var() != null) {
 //            System.out.println(varInit.getK_var());
         }
         if (varInit.getAnyName() != null) {
-                printAnyName(varInit.getAnyName());
+            ScopeChecker scopeChecker = printAnyNameExprIfAndJavaOther(varInit.getAnyName(),true, new ArrayList<>(),varInit.getLine());
+            varSymbol = scopeChecker.getSymbol();
         }
-        if (varInit.getAssign() != null) {
 
-//            System.out.println( "Operator : " +varInit.getAssign());
-        }
         if (varInit.getExpr() != null) {
-            printExpr(varInit.getExpr());
+            printExprVar(varInit.getExpr(),varSymbol);
         }
-
     }
 
     @Override
@@ -756,7 +895,6 @@ public class BaseASTVisitor implements ASTVisitor {
         }
 
 
-
     }
 
     @Override
@@ -768,7 +906,8 @@ public class BaseASTVisitor implements ASTVisitor {
 
     @Override
     public void visit(CreateStmt createStmt) {
-
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast createStmt " );
         if (createStmt.getDataBaseName() != null) {
 //            System.out.println("DataBaseName : "+createStmt.getDataBaseName());
         }
@@ -795,38 +934,36 @@ public class BaseASTVisitor implements ASTVisitor {
 
 //        System.out.println("===============Symbol Table ================");
 
-//        for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
+        for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
 //            System.out.println("Parent Type Name " + Main.symbolTable.getDeclaredTypes().get(i).getName());
-//
-//            Main.symbolTable.getDeclaredTypes().get(i).getColumns().entrySet().forEach(entry->{
+
+            Main.symbolTable.getDeclaredTypes().get(i).getColumns().entrySet().forEach(entry -> {
 //                System.out.println("Key : "+entry.getKey() + " | TypeName: "+entry.getValue().getName());
-//
-//            });
-//        }
+            });
+        }
 
     }
-
 
 
     @Override
     public void visit(InsertStmt insertStmt) {
 //        System.out.println("--------------------------------------");
 //        System.out.println(" ast insert");
-//        if(insertStmt.getDatabaseName() != null ){
-////            System.out.println("DatabaseName : "+insertStmt.getDatabaseName());;
-//        }
-//        if (insertStmt.getTableName() != null ){
-////            System.out.println("TableName : "+insertStmt.getTableName());
-//        }
-//        if (insertStmt.getColumnName() != null){
-//            for (int i = 0; i < insertStmt.getColumnName().size(); i++) {
-////                System.out.println("ColumnName : "+insertStmt.getColumnName().get(i));
-//            }
-//
-//        }
-//        if (insertStmt.getValues() != null) {
-////            System.out.println(insertStmt.getValues());
-//        }
+        if (insertStmt.getDatabaseName() != null) {
+//            System.out.println("DatabaseName : "+insertStmt.getDatabaseName());;
+        }
+        if (insertStmt.getTableName() != null) {
+//            System.out.println("TableName : "+insertStmt.getTableName());
+        }
+        if (insertStmt.getColumnName() != null) {
+            for (int i = 0; i < insertStmt.getColumnName().size(); i++) {
+//                System.out.println("ColumnName : "+insertStmt.getColumnName().get(i));
+            }
+
+        }
+        if (insertStmt.getValues() != null) {
+//            System.out.println(insertStmt.getValues());
+        }
         if (insertStmt.getExprs() != null) {
             for (int i = 0; i < insertStmt.getExprs().size(); i++) {
                 printExpr(insertStmt.getExprs().get(i));
@@ -850,13 +987,13 @@ public class BaseASTVisitor implements ASTVisitor {
         }
         if (dropStmt.getOrderingTerm() != null) {
             for (int i = 0; i < dropStmt.getOrderingTerm().size(); i++) {
-            printOrderingTerm(dropStmt.getOrderingTerm().get(i));
+                printOrderingTerm(dropStmt.getOrderingTerm().get(i));
 
             }
         }
         if (dropStmt.getExpr() != null) {
             for (int i = 0; i < dropStmt.getExpr().size(); i++) {
-            printExpr(dropStmt.getExpr().get(i));
+                printExpr(dropStmt.getExpr().get(i));
 
             }
         }
@@ -908,8 +1045,6 @@ public class BaseASTVisitor implements ASTVisitor {
     }
 
 
-
-
     @Override
     public void visit(FactoredSelectStmt factoredSelectStmt) {
 //        System.out.println("--------------------------------------");
@@ -917,12 +1052,11 @@ public class BaseASTVisitor implements ASTVisitor {
 
         if (factoredSelectStmt.getSelectCore() != null) {
 
-           printSelectCore(factoredSelectStmt.getSelectCore());
+            printSelectCore(factoredSelectStmt.getSelectCore());
 
         }
         if (factoredSelectStmt.getOrder() != null) {
 //            System.out.println(factoredSelectStmt.getOrder());
-            OrderBy = true;
         }
         if (factoredSelectStmt.getBy() != null) {
 //            System.out.println(factoredSelectStmt.getBy());
@@ -944,10 +1078,7 @@ public class BaseASTVisitor implements ASTVisitor {
             }
         }
 
-
-
     }
-
 
 
     @Override
@@ -955,26 +1086,26 @@ public class BaseASTVisitor implements ASTVisitor {
 //        System.out.println("--------------------------------------");
 //        System.out.println("ast Alterable" );
 
-        if (alterTableStmt.getDataBaseName() != null ) {
+        if (alterTableStmt.getDataBaseName() != null) {
 //            System.out.println(alterTableStmt.getDataBaseName());
         }
-        if (alterTableStmt.getAlterTableName() != null ) {
+        if (alterTableStmt.getAlterTableName() != null) {
 //            System.out.println(alterTableStmt.getAlterTableName());
         }
-        if (alterTableStmt.getNewTableName() != null ) {
+        if (alterTableStmt.getNewTableName() != null) {
 //            System.out.println(alterTableStmt.getNewTableName());
         }
 
-        if (alterTableStmt.getColumnDef() != null ) {
+        if (alterTableStmt.getColumnDef() != null) {
             printColumnDefList(alterTableStmt.getColumnDef());
         }
-        if (alterTableStmt.getRenameTo() != null ) {
+        if (alterTableStmt.getRenameTo() != null) {
 //            System.out.println(alterTableStmt.getRenameTo());
         }
-        if (alterTableStmt.getAlterTableAdd() != null ) {
+        if (alterTableStmt.getAlterTableAdd() != null) {
             printAlterTableAdd(alterTableStmt.getAlterTableAdd());
         }
-        if (alterTableStmt.getAlterTableAddConstraint() != null ) {
+        if (alterTableStmt.getAlterTableAddConstraint() != null) {
             printAlterTableAddConstraint(alterTableStmt.getAlterTableAddConstraint());
         }
 
@@ -1003,26 +1134,16 @@ public class BaseASTVisitor implements ASTVisitor {
 
     }
 
-//    private void printType(Type type) {
-//        if (type.getName() != null ) {
-////            System.out.println(type.getName());
-//        }
-//        if (type.getColumns() != null) {
-//            type.getColumns().entrySet().forEach(entry->{
-////                System.out.println("Name : "+entry.getKey() + " | type: "+entry.getValue().getName());
-//            });
-//        }
-//    }
 
     static String tableName;
-    static boolean HavingName;
-    static boolean OrderBy;
-    static boolean LiteralValueName;
-    static boolean GroupBy;
-    static int FunctionCount = 0;
-    static boolean WhereIN;
-    static int Line;
-    static int Col;
+     boolean HavingName;
+     boolean OrderBy;
+     boolean LiteralValueName;
+     boolean GroupBy;
+     int FunctionCount;
+     boolean WhereIN;
+     int Line;
+     int Col;
 
 
     private void printSelectCore(SelectCore selectCore) {
@@ -1053,7 +1174,7 @@ public class BaseASTVisitor implements ASTVisitor {
         }
 
         if (selectCore.getGroupBy() != null ) {
-             printGroupBy(selectCore.getGroupBy());
+            printGroupBy(selectCore.getGroupBy());
         }
 
         if (selectCore.getExprs() != null) {
@@ -1098,6 +1219,19 @@ public class BaseASTVisitor implements ASTVisitor {
             System.err.println("Error Having clause contains only grouping functions");
         }
 
+        if(!OrderBy){
+                if (GroupBy && HavingName ) {
+                    if(FunctionCount == 2){
+                        System.err.println(" Group by clause can’t contain aggregate function");
+                    }
+                }
+                if(GroupBy && !HavingName){
+                    if(FunctionCount > 0){
+                        System.err.println(" Group by clause can’t contain aggregate function");
+
+                    }
+                }
+            }
 
 
     }
@@ -1107,8 +1241,7 @@ public class BaseASTVisitor implements ASTVisitor {
 
         }
         if(groupBy.getGROUP() != null){
-
-            System.out.println("g");
+            GroupBy = true;
         }
         if(groupBy.getExpr() != null){
             printExpr(groupBy.getExpr());
@@ -1123,8 +1256,6 @@ public class BaseASTVisitor implements ASTVisitor {
             printExpr(having.getExpr());
         }
     }
-
-
     private void printAlterTableAddConstraint(AlterTableAddConstraint alterTableAddConstraint) {
 //        System.out.println("--------------------------------------");
 //        System.out.println("ast alterTableAddConstraint");
@@ -1138,7 +1269,7 @@ public class BaseASTVisitor implements ASTVisitor {
         if (alterTableAddConstraint.getConstraint() != null) {
 //            System.out.println(alterTableAddConstraint.getConstraint());
         }
-        if (alterTableAddConstraint.getTableConstraint() !=null) {
+        if (alterTableAddConstraint.getTableConstraint() != null) {
             printTableConstraints(alterTableAddConstraint.getTableConstraint());
         }
     }
@@ -1146,7 +1277,7 @@ public class BaseASTVisitor implements ASTVisitor {
     private void printAlterTableAdd(AlterTableAdd alterTableAdd) {
 //        System.out.println("--------------------------------------");
 //        System.out.println("ast alterTableAdd");
-        if (alterTableAdd.getAdd() != null){
+        if (alterTableAdd.getAdd() != null) {
 //            System.out.println(alterTableAdd.getAdd());
         }
         if (alterTableAdd.getTableConstraint() != null) {
@@ -1169,9 +1300,62 @@ public class BaseASTVisitor implements ASTVisitor {
 
     }
 
+    private void printExprVar(Expr expr, Symbol varSymbol) {
+        if (expr == null) {
+            return;
+        }
 
+        if (expr.getColumnName() != null) {
+            AnyName anyName = new AnyName();
+            anyName.setIDENTIFIER(expr.getColumnName());
+            ScopeChecker scopeChecker = getAllParentScopes(currentScope,anyName,new ScopeChecker());
+            if (!scopeChecker.isFound()) {
+                System.err.println("Error in line: "+expr.getLine()+" "+anyName.getIDENTIFIER() + " is not found");
+            }
 
+            if (scopeChecker.isFound() && !scopeChecker.isAssigned()) {
+                System.err.println("Warning in line: "+expr.getLine()+" "+ anyName.getIDENTIFIER() + " is never assigned");
+            }
 
+            if (scopeChecker.getSymbol() != null && varSymbol != null){
+                if (varSymbol.getType() != null && scopeChecker.getSymbol().getType() != null) {
+                    if (!scopeChecker.getSymbol().getType().getName()
+                            .equals(varSymbol.getType().getName())) {
+                        System.err.println("Error in line: "+expr.getLine()+ " Type of first var doesn't equal type of second var");
+                    }
+                }
+            }
+        }
+        if (expr.getLiteralValue() != null) {
+            printLiteralValue(expr.getLiteralValue());
+
+            if(varSymbol != null) {
+                if (varSymbol.getType() != null) {
+                    if (!varSymbol.getType().getName()
+                            .equals(varType)) {
+                        System.err.println("Error in line: "+expr.getLine()+ " Type of first var doesn't equal type of second var");
+                    }
+                }
+            }
+        }
+
+        if (expr.getSelectStmt() != null) {
+            printSelectStmt(expr.getSelectStmt());
+        }
+        if (expr.getSql_stmt_list() != null) {
+            for (int i = 0; i < expr.getSql_stmt_list().size(); i++) {
+                visit(expr.getSql_stmt_list().get(i));
+            }
+        }
+        if (expr.getExprs() != null) {
+            for (int i = 0; i < expr.getExprs().size(); i++) {
+                printExprVar(expr.getExprs().get(i),varSymbol);
+            }
+        }
+    }
+
+    List<String> list = new ArrayList<>();
+    List<String> listKey = new ArrayList<>();
     private void printExpr(Expr expr) {
 //        System.out.println("--------------------------------------");
 //        System.out.println("ast expr");
@@ -1191,44 +1375,37 @@ public class BaseASTVisitor implements ASTVisitor {
         if(expr.getTableName() != null){
 //            System.out.println("TableName : "+expr.getTableName());
 //            tableName = expr.getTableName();
+            checkIfTableExists(expr.getTableName(),expr.getLine(),expr.getCol());
         }
 
         if(expr.getFunctionName() != null){
 
-            if(!OrderBy){
-                if(GroupBy ){
-                    FunctionCount++;
-                }
-                if (GroupBy && HavingName ) {
-                    if(FunctionCount == 2){
-                        System.err.println("Error in line:" + (expr.getLine() - 1) +" Group by clause can’t contain aggregate function");
-                    }
-                }
-                if(GroupBy && !HavingName){
-                    if(FunctionCount > 0){
-                        System.err.println("Error in line:" + expr.getLine() +" Group by clause can’t contain aggregate function");
+            if (GroupBy) {
 
-                    }
-                }
+                FunctionCount++;
             }
-
-
         }
 
         if (expr.getColumnName() != null) {
+
             if (WhereIN ) {
 //            System.out.println(tableName+expr.getColumnName());
                 for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
                     String name = Main.symbolTable.getDeclaredTypes().get(i).getName();
                     Main.symbolTable.getDeclaredTypes().get(i).getColumns().forEach((key, value) -> {
                         if (key.equals(expr.getColumnName()) && name.equals(tableName) ) {
-                        System.out.println(key);
-                        System.out.println(value.getName());
-
+                            list.add(value.getName());
+                            listKey.add(key);
                         }
 
                     });
 
+                }
+
+                if (list.size() == 2) {
+                    if (!list.get(0).equals(list.get(1))){
+                        System.err.println("Error in line "+expr.getLine()+" Also "+listKey.get(0)+" and "+listKey.get(1)+" should be from the same type");
+                    }
                 }
 
 
@@ -1239,12 +1416,12 @@ public class BaseASTVisitor implements ASTVisitor {
 
         if (expr.getLiteralValue() != null  ) {
 
-        if(HavingName){
+            if(HavingName){
 
-            LiteralValueName = true;
-        }
+                LiteralValueName = true;
+            }
 
-        printLiteralValue(expr.getLiteralValue());
+            printLiteralValue(expr.getLiteralValue());
 
 
         }
@@ -1274,13 +1451,55 @@ public class BaseASTVisitor implements ASTVisitor {
             if(Main.symbolTable.getDeclaredTypes().size() > 0){
                 for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
                     if (Main.symbolTable.getDeclaredTypes().get(i).getName().equals(tableName)) {
-                    checkColInTable(expr.getColumnName() , tableName ,expr.getLine());//////////// test
+                        checkColInTable(expr.getColumnName() , tableName ,expr.getLine());//////////// test
                     }
                 }
             }
         }
 
 
+    }
+
+    private ScopeChecker printExprInlineCond(Expr expr, ScopeChecker scopeChecker, List<Symbol> symbols) {
+        if (expr == null) {
+            return scopeChecker;
+        }
+
+        if (expr.getExprs() != null) {
+            if (expr.getExprs().size() > 0) {
+                for (int i = 0; i < expr.getExprs().size(); i++) {
+                    scopeChecker = printExprInlineCond(expr.getExprs().get(i), scopeChecker,symbols);
+                }
+            }
+        }
+
+        if (expr.getColumnName() != null) {
+            if (currentScope != null) {
+                AnyName anyName = new AnyName();
+                anyName.setIDENTIFIER(expr.getColumnName());
+                scopeChecker = getAllParentScopes(currentScope, anyName,new ScopeChecker());
+                if (!scopeChecker.isFound()) {
+                    System.err.println("Error in line:"+expr.getLine()+" "+anyName.getIDENTIFIER() + " is not found");
+                }
+
+                if (scopeChecker.isFound()){
+                    symbols.add(scopeChecker.getSymbol());
+                }
+
+                if (scopeChecker.isFound() && !scopeChecker.isAssigned()){
+                    System.err.println("Warning in line:"+expr.getLine()+" "+anyName.getIDENTIFIER() + " is never assigned");
+                }
+            }
+        }
+        if (expr.getLiteralValue() != null) {
+            printLiteralValue(expr.getLiteralValue(),symbols);
+        }
+
+        if (expr.getSelectStmt() != null) {
+            printSelectStmt(expr.getSelectStmt());
+        }
+
+        return scopeChecker;
     }
 
     private void printExpr(Expr_Print expr) {
@@ -1290,13 +1509,13 @@ public class BaseASTVisitor implements ASTVisitor {
             return;
         }
 
-        if(expr.getDatabaseName() != null){
+        if (expr.getDatabaseName() != null) {
 //            System.out.println("DatabaseName : "+expr.getDatabaseName());
         }
-        if(expr.getTableName() != null){
+        if (expr.getTableName() != null) {
 //            System.out.println("TableName : "+expr.getTableName());
         }
-        if(expr.getFunctionName() != null){
+        if (expr.getFunctionName() != null) {
 //            System.out.println("FunctionName : "+expr.getFunctionName());
         }
 
@@ -1304,11 +1523,10 @@ public class BaseASTVisitor implements ASTVisitor {
 //            System.out.println("Expr : "+expr.getColumnName());
             return;
         }
-        if (expr.getLiteralValue() != null ) {
+        if (expr.getLiteralValue() != null) {
             printLiteralValue(expr.getLiteralValue());
-
         }
-        if (expr.getUnaryOperator() != null ) {
+        if (expr.getUnaryOperator() != null) {
             printUnaryOperator(expr.getUnaryOperator());
         }
         if (expr.getOperation() != null) {
@@ -1321,98 +1539,123 @@ public class BaseASTVisitor implements ASTVisitor {
         }
     }
 
-    private void printExprForAndOperator(Expr_for_and_operator expr) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast expr");
+    private void printExprForAndOperator(Expr_for_and_operator expr, boolean isKeyVarExist) {
         if (expr == null) {
             return;
         }
 
-        if (expr.getLiteralValue() != null ) {
+        if (expr.getLiteralValue() != null) {
             printLiteralValue(expr.getLiteralValue());
         }
 
-        if (expr.getOperation() != null) {
-            for (int i = 0; i < expr.getOperation().size(); i++) {
-//                System.out.println("Operation : " +expr.getOperation().get(i));
+        if (expr.getExpr_for_and_operator() != null) {
+            printExprForAndOperator(expr.getExpr_for_and_operator(),isKeyVarExist);
+        }
+
+        if (expr.getAnyName() != null) {
+            List<Symbol> symbols = new ArrayList<>();
+            printAnyNameExprIfAndJavaOther(expr.getAnyName(),true,symbols, expr.getLine());
+        }
+
+        if (expr.getExprVarInit() != null){
+            printExprForVarInit(expr.getExprVarInit(),isKeyVarExist);
+        }
+    }
+
+    private void printExprForVarInit(ExprVarInit exprVarInit, boolean isKeyVarExist) {
+        Symbol varSymbol = new Symbol();
+
+        if (exprVarInit.getCurrentScope() != null) {
+            currentScope = exprVarInit.getCurrentScope();
+        }
+
+        if (!isKeyVarExist) {
+            if (exprVarInit.getAnyName() != null) {
+                List<Symbol> symbols = new ArrayList<>();
+                ScopeChecker scopeChecker = printAnyNameExprIfAndJavaOther(exprVarInit.getAnyName(), true,symbols,exprVarInit.getLine());
+                varSymbol = scopeChecker.getSymbol();
+            }
+
+            if (exprVarInit.getExpr() != null) {
+                printExprVar(exprVarInit.getExpr(), varSymbol);
             }
         }
     }
 
-    private void printExprIf(Expr_if expr) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast expr if");
 
+    private ScopeChecker printExprIf(Expr_if expr, boolean isInsideForStmt, ScopeChecker scopeChecker,List<Symbol> symbols) {
         if (expr == null) {
-            return;
+            return new ScopeChecker();
         }
 
-        if (expr.getLiteralValue() != null ) {
-//            System.out.println("enter expr if ");
-            printLiteralValue(expr.getLiteralValue());
+        if (expr.getLiteralValue() != null) {
+            printLiteralValue(expr.getLiteralValue(),symbols);
         }
 
         if (expr.getOperation() != null) {
             for (int i = 0; i < expr.getOperation().size(); i++) {
-//                System.out.println("Operation : " +expr.getOperation().get(i));
             }
         }
+
+        if (expr.getExpr_ifs() != null){
+            for (int i = 0; i < expr.getExpr_ifs().size(); i++) {
+                scopeChecker = printExprIf(expr.getExpr_ifs().get(i),isInsideForStmt,scopeChecker,symbols);
+            }
+        }
+
         if (expr.getAnyNames() != null) {
             for (int i = 0; i < expr.getAnyNames().size(); i++) {
-                printAnyNameExprIf(expr.getAnyNames().get(i));
+                if (isInsideForStmt)
+                    scopeChecker = printAnyNameExprIfAndJavaOther(expr.getAnyNames().get(i),true,symbols,expr.getLine());
+                else
+                    scopeChecker = printAnyNameExprIfAndJavaOther(expr.getAnyNames().get(i),false,symbols,expr.getLine());
             }
         }
+        return scopeChecker;
     }
 
-    private void printExprWhile(Expr_while expr) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast Expr_while");
+    private ScopeChecker printExprWhile(Expr_while expr, ScopeChecker scopeChecker,List<Symbol> symbols ) {
         if (expr == null) {
-            return;
+            return new ScopeChecker();
         }
 
-        if (expr.getLiteralValue() != null ) {
-            printLiteralValue(expr.getLiteralValue());
+        if (expr.getLiteralValue() != null) {
+            printLiteralValue(expr.getLiteralValue(),symbols);
         }
 
-        if (expr.getOperation() != null) {
-            for (int i = 0; i < expr.getOperation().size(); i++) {
-//                System.out.println("Operation : " +expr.getOperation().get(i));
-            }
-        }
-
-        if (expr.getExpr_while() != null){
+        if (expr.getExpr_while() != null) {
             for (int i = 0; i < expr.getExpr_while().size(); i++) {
-                printExprWhile(expr.getExpr_while().get(i));
+                scopeChecker = printExprWhile(expr.getExpr_while().get(i),scopeChecker,symbols);
             }
         }
 
         if (expr.getAnyNamesList() != null) {
             for (int i = 0; i < expr.getAnyNamesList().size(); i++) {
-                printAnyNameExprIf(expr.getAnyNamesList().get(i));
+                scopeChecker = printAnyNameExprIfAndJavaOther(expr.getAnyNamesList().get(i),false,symbols,expr.getLine());
             }
         }
+
+        return scopeChecker;
     }
 
     private void printUnaryOperator(UnaryOperator unaryOperator) {
 //        System.out.println("--------------------------------------");
 //        System.out.println("ast unaryOperator");
-        if (unaryOperator.getNot() != null){
+        if (unaryOperator.getNot() != null) {
 //            System.out.println("Operator : "+ unaryOperator.getNot());
         }
-        if (unaryOperator.getMinus() != null){
+        if (unaryOperator.getMinus() != null) {
 //            System.out.println("Operator : "+ unaryOperator.getMinus());
         }
-        if (unaryOperator.getPlus() != null){
+        if (unaryOperator.getPlus() != null) {
 //            System.out.println("Operator : "+ unaryOperator.getPlus());
         }
-        if (unaryOperator.getTilde() != null){
+        if (unaryOperator.getTilde() != null) {
 //            System.out.println("Operator : "+ unaryOperator.getTilde());
         }
     }
 
-    private void printLiteralValue(LiteralValue literalValue) {
-
+    private void printLiteralValue(LiteralValue literalValue, List<Symbol> symbols) {
 //        System.out.println("--------------------------------------");
 //        System.out.println("ast literalValue");
         if (literalValue.getCurrentTimeStamp() != null) {
@@ -1424,51 +1667,76 @@ public class BaseASTVisitor implements ASTVisitor {
         if (literalValue.getNullValue() != null) {
 //            System.out.println(literalValue.getNullValue() );
         }
-        if (literalValue.getBlobValue()  != null) {
+        if (literalValue.getBlobValue() != null) {
+//            System.out.println(literalValue.getBlobValue() );
+        }
+        Symbol s = new Symbol();
+        if (literalValue.getNumericalValue() != null) {
+            varType = Type.NUMBER_CONST; // this for for_stmt
+            Type type = new Type();
+            type.setName(varType);
+            s.setType(type);
+            s.setName("literal number");
+            symbols.add(s);
+        }
+        if (literalValue.getStringValue() != null) {
+            varType = Type.STRING_CONST; // this for for_stmt
+            Type type = new Type();
+            type.setName(varType);
+            s.setType(type);
+            s.setName("literal string");
+            symbols.add(s);
+        }
+    }
+
+    private void printLiteralValue(LiteralValue literalValue) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast literalValue");
+        if (literalValue.getCurrentTimeStamp() != null) {
+//            System.out.println(literalValue.getCurrentTimeStamp());
+        }
+        if (literalValue.getCurrentTime() != null) {
+//            System.out.println(literalValue.getCurrentTime() );
+        }
+        if (literalValue.getNullValue() != null) {
+//            System.out.println(literalValue.getNullValue() );
+        }
+        if (literalValue.getBlobValue() != null) {
 //            System.out.println(literalValue.getBlobValue() );
         }
         if (literalValue.getNumericalValue() != null) {
-//            System.out.println(literalValue.getNumericalValue() );
-
-
-        }
-        if (literalValue.getCurrentDate() != null) {
-//            System.out.println(literalValue.getCurrentDate() );
+            varType = Type.NUMBER_CONST; // this for for_stmt
         }
         if (literalValue.getStringValue() != null) {
-//            System.out.println(literalValue.getStringValue());
+            varType = Type.STRING_CONST; // this for for_stmt
         }
     }
 
     private void printSelectOrValues(SelectOrValues selectOrValues) {
 //        System.out.println("--------------------------------------");
 //        System.out.println("ast selectOrValues");
-
-        if (selectOrValues.getExpr() != null ) {
-            for (int i = 0; i < selectOrValues.getExpr().size(); i++) {
-                printExpr(selectOrValues.getExpr().get(i));
-            }
-        }
-        if (selectOrValues.getTableOrSubQueries() != null ) {
-            for (int i = 0; i < selectOrValues.getTableOrSubQueries().size(); i++) {
-                printTableOrSubQueries(selectOrValues.getTableOrSubQueries().get(i));
-            }
-        }
-        if (selectOrValues.getResultColumns() != null ) {
+        if (selectOrValues.getResultColumns() != null) {
             for (int i = 0; i < selectOrValues.getResultColumns().size(); i++) {
-            printResultColumns(selectOrValues.getResultColumns().get(i));
-                
+                printResultColumns(selectOrValues.getResultColumns().get(i));
+
             }
         }
         if (selectOrValues.getFrom() != null) {
 //            System.out.println(selectOrValues.getFrom());
         }
-        if (selectOrValues.getJoinClause() != null ) {
+        if (selectOrValues.getJoinClause() != null) {
             printJoinClause(selectOrValues.getJoinClause());
         }
-
-
-
+        if (selectOrValues.getTableOrSubQueries() != null) {
+            for (int i = 0; i < selectOrValues.getTableOrSubQueries().size(); i++) {
+                printTableOrSubQueries(selectOrValues.getTableOrSubQueries().get(i));
+            }
+        }
+        if (selectOrValues.getExpr() != null) {
+            for (int i = 0; i < selectOrValues.getExpr().size(); i++) {
+                printExpr(selectOrValues.getExpr().get(i));
+            }
+        }
 
     }
 
@@ -1518,16 +1786,19 @@ public class BaseASTVisitor implements ASTVisitor {
             }
 
         }
-            if(!checkTable.get()){
-                System.err.println("Error in line:"+line +" col:"+col +" "+table+ " not found "  );
-            }
+        if(!checkTable.get()){
+            System.err.println("Error in line:"+line +" col:"+col +" "+table+ " not found "  );
+        }
     }
-
 
     private void printJoinClause(JoinClause joinClause) {
 //        System.out.println("--------------------------------------");
 //        System.out.println("ast joinClause");
-
+        if (joinClause.getJoinOperator() != null) {
+            for (int i = 0; i < joinClause.getJoinOperator().size(); i++) {
+                printJoinOperator(joinClause.getJoinOperator().get(i));
+            }
+        }
         if (joinClause.getTableOrSubQuery() != null) {
             for (int i = 0; i < joinClause.getTableOrSubQuery().size(); i++) {
                 printTableOrSubQueries(joinClause.getTableOrSubQuery().get(i));
@@ -1539,17 +1810,6 @@ public class BaseASTVisitor implements ASTVisitor {
                 printJoinConstraint(joinClause.getJoinConstraint().get(i));
             }
         }
-
-
-
-        if (joinClause.getJoinOperator() != null) {
-            for (int i = 0; i < joinClause.getJoinOperator().size(); i++) {
-                printJoinOperator(joinClause.getJoinOperator().get(i));
-            }
-        }
-
-
-
 
     }
 
@@ -1582,7 +1842,6 @@ public class BaseASTVisitor implements ASTVisitor {
         if (joinConstraint.getExpr() != null) {
             printExpr(joinConstraint.getExpr());
         }
-
     }
 
     private void printResultColumns(ResultColumn resultColumn) {
@@ -1604,7 +1863,7 @@ public class BaseASTVisitor implements ASTVisitor {
         }
         if (resultColumn.getExpr() != null) {
 //                printExprResultColumn(resultColumn.getExpr());
-                printExpr(resultColumn.getExpr());
+            printExpr(resultColumn.getExpr());
         }
 
 
@@ -1617,29 +1876,29 @@ public class BaseASTVisitor implements ASTVisitor {
 //            System.out.println("Expr : "+expr.getColumnName());
 //            System.out.println("table NAME : "+tableName);
             for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
-               String name = Main.symbolTable.getDeclaredTypes().get(i).getName();
+                String name = Main.symbolTable.getDeclaredTypes().get(i).getName();
                 Main.symbolTable.getDeclaredTypes().get(i).getColumns().forEach((key, value) -> {
 
                     if ( name.equals(tableName)) {
                         checkTable.set(true);
                         if(expr.getColumnName().equals(key)){
-                        check.set(true);
+                            check.set(true);
                         }
                     }
 
                 });
 
             }
-           if(tableName != null){
-               if(!checkTable.get()){
+            if(tableName != null){
+                if(!checkTable.get()){
 //                   System.err.println(tableName+ " not found "  );
-               }else {
-                   if (!check.get()) {
-                       System.err.println("Error In Line :" + expr.getLine() +" "+expr.getColumnName() + " undefined Column in " + tableName );
+                }else {
+                    if (!check.get()) {
+                        System.err.println("Error In Line :" + expr.getLine() +" "+expr.getColumnName() + " undefined Column in " + tableName );
 
-                   }
-               }
-           }
+                    }
+                }
+            }
 
 
         }
@@ -1666,7 +1925,7 @@ public class BaseASTVisitor implements ASTVisitor {
         }
         if(table != null){
             if(!checkTable.get()){
-                   System.err.println("Error in line "+Line +" "+table+ " not found "  );
+                System.err.println("Error in line "+Line +" "+table+ " not found "  );
             }else {
                 if (!check.get()) {
                     System.err.println( "Error in line "+Line +" "+columnName + " undefined Column in " + table );
@@ -1675,6 +1934,7 @@ public class BaseASTVisitor implements ASTVisitor {
             }
         }
     }
+
     private void printOrderingTerm(OrderingTerm orderingTerm) {
 //        System.out.println("--------------------------------------");
 //        System.out.println("ast orderingTerm");
@@ -1698,7 +1958,7 @@ public class BaseASTVisitor implements ASTVisitor {
         }
         if (columnDef.getTypeName() != null) {
             for (int i = 0; i < columnDef.getTypeName().size(); i++) {
-            printTypeName(columnDef.getTypeName().get(i));
+                printTypeName(columnDef.getTypeName().get(i));
             }
         }
         if (columnDef.getColumnConstraint() != null) {
@@ -1715,7 +1975,7 @@ public class BaseASTVisitor implements ASTVisitor {
 //        System.out.println("ast typeName");
         if (typeName.getAnyNames() != null) {
             for (int i = 0; i < typeName.getAnyNames().size(); i++) {
-            printAnyName(typeName.getAnyNames().get(i));
+                printAnyName(typeName.getAnyNames().get(i));
 
             }
         }
@@ -1738,7 +1998,7 @@ public class BaseASTVisitor implements ASTVisitor {
                 }
             }
             if (!check) {
-                System.err.println("type " + typeName.getName() +" not Found");
+                System.err.println("Error in line: " + typeName.getLine()+" type " + typeName.getName() +" not Found");
 
             }
         }
@@ -1768,6 +2028,7 @@ public class BaseASTVisitor implements ASTVisitor {
 
 
     }
+
     public static String typeName;
     private void printAnyName(AnyName anyName) {
 //        System.out.println("--------------------------------------");
@@ -1779,7 +2040,7 @@ public class BaseASTVisitor implements ASTVisitor {
             printAnyName(anyName.getAnyName());
         }
         if (anyName.getIDENTIFIER() != null) {
-            System.out.println(anyName.getIDENTIFIER());
+//            System.out.println(anyName.getIDENTIFIER());
             typeName = anyName.getIDENTIFIER();
 
             if (anyName.getStrinagLiteral() != null) {
@@ -1791,22 +2052,33 @@ public class BaseASTVisitor implements ASTVisitor {
         }
     }
 
-    private void printAnyNameExprIf (AnyName anyName) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast anyName expr if");
+
+    private ScopeChecker printAnyNameExprIfAndJavaOther(AnyName anyName, boolean isForOrVar, List<Symbol> symbols ,int line ) {
+
         if (anyName == null) {
-            return;
+            return new ScopeChecker();
         }
+        ScopeChecker scopeChecker = new ScopeChecker();
         if (anyName.getAnyName() != null) {
-            printAnyName(anyName.getAnyName());
+            printAnyNameExprIfAndJavaOther(anyName.getAnyName(),isForOrVar,symbols,line);
         }
         if (anyName.getIDENTIFIER() != null) {
-//            System.out.println("any name for check"+anyName.getIDENTIFIER());
+            varName = anyName.getIDENTIFIER();
 
-            if (parentScope != null) {
-                boolean check = getAllParent(parentScope,anyName);
-                if (!check){
-                    System.err.println( anyName.getIDENTIFIER()+" is not found");
+            if (currentScope != null) {
+                scopeChecker = getAllParentScopes(currentScope, anyName,new ScopeChecker());
+                if (!scopeChecker.isFound()) {
+                    System.err.println("Error in line: " +line+" "+anyName.getIDENTIFIER() + " is not found");
+                }
+
+                if (scopeChecker.isFound()){
+                    symbols.add(scopeChecker.getSymbol());
+                }
+
+                if (!isForOrVar) {
+                    if (scopeChecker.isFound() && !scopeChecker.isAssigned()) {
+                        System.err.println("Warning in line: " +line+" "+anyName.getIDENTIFIER() + " is never assigned");
+                    }
                 }
             }
         }
@@ -1817,34 +2089,34 @@ public class BaseASTVisitor implements ASTVisitor {
         if (anyName.getKeyword() != null) {
 //            System.out.println(anyName.getKeyword());
         }
+
+        return scopeChecker;
     }
 
-    private boolean getAllParent(Scope scope, AnyName anyName){
-        boolean check = false;
-        if (scope.getParent() != null){
-
-//            System.out.println("parentScope: " + scope.getId());
+    private ScopeChecker getAllParentScopes(Scope scope, AnyName anyName, ScopeChecker scopeChecker) {
+        if (scope.getParent() != null) {
 
             for (Symbol symbol : scope.getParent().getSymbols()) {
-//                System.out.println("parent: "+scope.getParent().getId()+" symbol: "+ symbol.getName());
-                if (symbol.getName().equals(anyName.getIDENTIFIER())){
-                    check = true;
+                if (symbol.getName().equals(anyName.getIDENTIFIER()) && symbol.isHasKeyVar()) {
+                    scopeChecker.setFound(true);
+                    scopeChecker.setAssigned(symbol.isAssigned());
+                    scopeChecker.setSymbol(symbol);
                     break;
                 }
             }
-            if (!check) {
-                check = getAllParent(scope.getParent(),anyName);
+            if (!scopeChecker.isFound()) {
+                scopeChecker = getAllParentScopes(scope.getParent(), anyName,scopeChecker);
             }
         }
 
-        return check;
+        return scopeChecker;
     }
 
     private void printColumnConstraint(ColumnConstraint columnConstraint) {
 //        System.out.println("--------------------------------------");
 //        System.out.println("ast columnConstraint");
         if (columnConstraint.getColumnForeignKey() != null) {
-                printColumnForeignKey(columnConstraint.getColumnForeignKey());
+            printColumnForeignKey(columnConstraint.getColumnForeignKey());
         }
         if (columnConstraint.getColumnNotNull() != null) {
             if (columnConstraint.getColumnNotNull().getNot() != null) {
@@ -1883,7 +2155,6 @@ public class BaseASTVisitor implements ASTVisitor {
 
     }
 
-
     private void printColumnForeignKey(ColumnForeignKey columnForeignKey) {
 //        System.out.println("--------------------------------------");
 //        System.out.println("columnForeignKey");
@@ -1918,13 +2189,13 @@ public class BaseASTVisitor implements ASTVisitor {
         if (tableConstraint.getForeignKeys() != null) {
             printForeignkeys(tableConstraint.getForeignKeys());
         }
-        if (tableConstraint.getTableConstraintKey() !=null ) {
+        if (tableConstraint.getTableConstraintKey() != null) {
             printTableConstraintKey(tableConstraint.getTableConstraintKey());
         }
-        if (tableConstraint.getTableConstraintPrimaryKey()  != null) {
+        if (tableConstraint.getTableConstraintPrimaryKey() != null) {
             printTableConstraintPrimaryKey(tableConstraint.getTableConstraintPrimaryKey());
         }
-        if (tableConstraint.getTableConstraintUnique() !=null) {
+        if (tableConstraint.getTableConstraintUnique() != null) {
             printTableConstraintUnique(tableConstraint.getTableConstraintUnique());
         }
         if (tableConstraint.getCheckExpr() != null) {
@@ -1933,7 +2204,7 @@ public class BaseASTVisitor implements ASTVisitor {
         if (tableConstraint.getExpr() != null) {
             printExpr(tableConstraint.getExpr());
         }
-        if (tableConstraint.getConstraint() != null ) {
+        if (tableConstraint.getConstraint() != null) {
 //            System.out.println(tableConstraint.getConstraint());
         }
     }
@@ -1970,7 +2241,6 @@ public class BaseASTVisitor implements ASTVisitor {
         }
 
 
-
     }
 
     private void printIndexedColumn(IndexedColumn indexedColumn) {
@@ -2005,7 +2275,7 @@ public class BaseASTVisitor implements ASTVisitor {
     private void printForeignkeys(ForeignKey foreignKeys) {
 //        System.out.println("--------------------------------------");
 //        System.out.println("ast foreignKeys");
-        if (foreignKeys.getForeignKeyClause() != null ) {
+        if (foreignKeys.getForeignKeyClause() != null) {
             printForeignKeyClause(foreignKeys.getForeignKeyClause());
         }
     }
@@ -2018,7 +2288,7 @@ public class BaseASTVisitor implements ASTVisitor {
                 printExpr(selectStmt.getExpr().get(i));
             }
         }
-        if(selectStmt.getFromItem() !=null){
+        if (selectStmt.getFromItem() != null) {
 //            System.out.println("FromItem : "+selectStmt.getFromItem());
         }
         if (selectStmt.getSelectOrValues() != null) {

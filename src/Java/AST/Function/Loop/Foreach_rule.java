@@ -1,11 +1,12 @@
 package Java.AST.Function.Loop;
 
+import Java.AST.Node;
 import Java.AST.QueryStmt.AnyName;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Foreach_rule {
+public class Foreach_rule extends Node {
     private List<AnyName> anyNames;
     private String K_var;
 

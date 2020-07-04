@@ -9,19 +9,19 @@ import Java.SymbolTable.Scope;
 import java.util.List;
 public class If_stmt extends Node {
     private String K_if;
-    private Scope parentScope;
+    private Scope currentScope;
 
     private Body body_if= new Body() ;
-     private List<Expr_if> expr_ifs;
-     private List<Else_if> else_ifList;
-     private Else elsee=new Else();
+    private List<Expr_if> expr_ifs;
+    private List<Else_if> else_ifList;
+    private Else elsee=new Else();
 
-    public Scope getParentScope() {
-        return parentScope;
+    public Scope getCurrentScope() {
+        return currentScope;
     }
 
-    public void setParentScope(Scope parentScope) {
-        this.parentScope = parentScope;
+    public void setCurrentScope(Scope currentScope) {
+        this.currentScope = currentScope;
     }
 
     public String getK_if() {

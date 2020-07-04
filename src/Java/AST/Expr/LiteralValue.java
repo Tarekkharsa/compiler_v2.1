@@ -1,6 +1,8 @@
 package Java.AST.Expr;
 
-public class LiteralValue {
+import Java.AST.Node;
+
+public class LiteralValue extends Node {
     private String numericalValue;
     private String stringValue;
     private String nullValue;

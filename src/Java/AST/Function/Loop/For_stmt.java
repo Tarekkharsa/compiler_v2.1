@@ -1,11 +1,21 @@
 package Java.AST.Function.Loop;
 import Java.AST.Function.Body;
+import Java.SymbolTable.Scope;
 
 public class For_stmt {
     private String K_for;
     private Body body_for; ;
     private For_rule for_rule;
     private Foreach_rule foreach_rule;
+    private Scope currentScope;
+
+    public Scope getCurrentScope() {
+        return currentScope;
+    }
+
+    public void setCurrentScope(Scope currentScope) {
+        this.currentScope = currentScope;
+    }
 
     public Body getBody_for() {
         return body_for;

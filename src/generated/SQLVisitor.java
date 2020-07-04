@@ -299,11 +299,17 @@ public interface SQLVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitExpr_if(SQLParser.Expr_ifContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link SQLParser#}.
+	 * Visit a parse tree produced by {@link SQLParser#expr_for_and_operator}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitExpr_for_and_operator(SQLParser.Expr_for_and_operatorContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#expr_var_init}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExpr_var_init(SQLParser.Expr_var_initContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link SQLParser#}.
 	 * @param ctx the parse tree

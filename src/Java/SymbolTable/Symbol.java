@@ -7,7 +7,24 @@ public class Symbol {
     private Scope scope;
     private boolean isParam;
 
+    private boolean hasKeyVar;
+    private boolean isAssigned;
 
+    public boolean isAssigned() {
+        return isAssigned;
+    }
+
+    public void setAssigned(boolean assigned) {
+        isAssigned = assigned;
+    }
+
+    public boolean isHasKeyVar() {
+        return hasKeyVar;
+    }
+
+    public void setHasKeyVar(boolean hasKeyVar) {
+        this.hasKeyVar = hasKeyVar;
+    }
 
     public String getName() {
         return name;

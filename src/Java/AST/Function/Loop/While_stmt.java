@@ -1,5 +1,4 @@
 package Java.AST.Function.Loop;
-import Java.AST.Expr.Expr;
 import Java.AST.Expr.Expr_while;
 import Java.AST.Function.Body;
 import Java.SymbolTable.Scope;
@@ -11,14 +10,14 @@ public class While_stmt {
     private Body body_while; ;
     private List<Expr_while> expr_whileList ;
     private String K_while;
-    private Scope parentScope;
+    private Scope currentScope;
 
-    public Scope getParentScope() {
-        return parentScope;
+    public Scope getCurrentScope() {
+        return currentScope;
     }
 
-    public void setParentScope(Scope parentScope) {
-        this.parentScope = parentScope;
+    public void setCurrentScope(Scope currentScope) {
+        this.currentScope = currentScope;
     }
 
     public String getK_while() {

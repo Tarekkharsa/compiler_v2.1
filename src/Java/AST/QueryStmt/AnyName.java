@@ -1,6 +1,8 @@
 package Java.AST.QueryStmt;
 
-public class AnyName {
+import Java.AST.Node;
+
+public class AnyName extends Node {
     private String IDENTIFIER;
     private String keyword;
     private String strinagLiteral;

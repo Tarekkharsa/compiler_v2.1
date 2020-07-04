@@ -8,6 +8,9 @@ import java.util.Map;
 public class Scope {
     private String id;
     private Scope parent;
+    private String typeName = "default";
+    private String funcName;
+    private int numOfFuncParams;
     private Map<String, Symbol> symbolMap = new LinkedHashMap<String, Symbol>();
     private List<Symbol> symbols = new ArrayList<>();
 
@@ -19,6 +22,21 @@ public class Scope {
         this.id = id;
     }
 
+    public String getTypeName() {
+        return typeName;
+    }
+
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
+    }
+
+    public String getFuncName() {
+        return funcName;
+    }
+
+    public void setFuncName(String funcName) {
+        this.funcName = funcName;
+    }
 
     public Scope getParent() {
         return parent;
@@ -46,4 +64,14 @@ public class Scope {
     public void setSymbol(Symbol symbol) {
         this.symbols.add(symbol);
     }
+
+    public int getNumOfFuncParams() {
+        return numOfFuncParams;
+    }
+
+    public void setNumOfFuncParams(int numOfFuncParams) {
+        this.numOfFuncParams = numOfFuncParams;
+    }
+
+    public final static String FUNCTION = "function";
 }

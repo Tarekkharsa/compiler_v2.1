@@ -135,7 +135,7 @@ var_get_func
 //    |any_name OPEN_ARRAY expr CLOSE_ARRAY (ASSIGN (any_name | signed_number | sql_stmt_list | inline_condition_stmt))?';'
 //;
 var_init:
-K_VAR any_name ASSIGN expr';';
+K_VAR? any_name (ASSIGN expr)? ';';
 
 var_operator
    : expr_for_and_operator ';'*
@@ -249,7 +249,7 @@ return_stmt :
 switch_stmt
   : K_SWITCH OPEN_PAR any_name CLOSE_PAR
     OPEN_B
-     (K_CASE (any_name | signed_number) ':' (body | OPEN_B body (K_BREAK';')? CLOSE_B ';'*) (K_BREAK';')? )*
+     (K_CASE (literal_value | any_name) ':' (body | OPEN_B body (K_BREAK';')? CLOSE_B ';'*) (K_BREAK';')? )*
      (K_DEFAULT ':'
      (body | OPEN_B body (K_BREAK';')? CLOSE_B ';'*)? (K_BREAK';')?)?
     CLOSE_B
@@ -744,12 +744,15 @@ expr_while
 expr_for_and_operator
     : literal_value
     | any_name
+    | expr_var_init
     | (any_name (PLUS_PLUS | MINUS_MINUS))
     | ((PLUS_PLUS | MINUS_MINUS) any_name)
-    | expr_for_and_operator ( ASSIGN | EQ_WITH_PLUS | EQ_WITH_MINUS | MINUS_WITH_EQ | PLUS_WITH_EQ | STAR_WITH_EQ | DIV_WITH_EQ ) expr_for_and_operator
+//    | expr_for_and_operator ( ASSIGN | EQ_WITH_PLUS | EQ_WITH_MINUS | MINUS_WITH_EQ | PLUS_WITH_EQ | STAR_WITH_EQ | DIV_WITH_EQ ) expr_for_and_operator
     | OPEN_PAR expr_for_and_operator CLOSE_PAR
     ;
-
+expr_var_init:
+any_name ASSIGN expr
+;
     expr_print
       : literal_value
       | any_name
