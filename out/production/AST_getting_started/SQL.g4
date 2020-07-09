@@ -384,11 +384,16 @@ create_table_stmt
    ( database_name '.' )? table_name
 //   ( '(' column_def ( ',' table_constraint | ',' column_def )* ')' ( K_WITHOUT IDENTIFIER )?
    ( '(' column_def ( ',' table_constraint | ',' column_def )* ')'
-   (K_TYPE ASSIGN (K_JSON | K_CSV) ',' 'path' ASSIGN any_name)?
+   (type ',' path)?
 //   | K_AS select_stmt
 //   ) (unknown)?
    )
  ;
+ type:
+ K_TYPE ASSIGN (K_JSON | K_CSV);
+
+ path:
+ 'path' ASSIGN any_name;
 
 create_type_stmt
 // : K_CREATE ( K_TEMP | K_TEMPORARY )? K_TABLE ( K_IF K_NOT K_EXISTS )?

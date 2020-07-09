@@ -1,6 +1,6 @@
-create table users (id number, string name) type = “json” path= “C:”;
-create table users1 (id number, string name) type = “json” path= “C:”;
+create type Address (id number, name string);
+create table users (id number, name string, address Address ) type =csv , path= 'C:\Users\Bcc\Desktop\Code Generation\users.csv';
+
 Func(){
-var z = select * from users;
-z = select * from users1;
+    var z = select * from users;
 }

@@ -1305,6 +1305,8 @@ public class BaseVisitor extends SQLBaseVisitor {
         return anyName;
     }
 
+
+
     /**
      * {@inheritDoc}
      *
@@ -1530,6 +1532,23 @@ public class BaseVisitor extends SQLBaseVisitor {
         Main.symbolTable.getDeclaredTypes().add(tableType);
 
         CreateStmt createStmt = new CreateStmt();
+
+
+        if(ctx.type() != null){
+            if(ctx.type().K_CSV() != null){
+            tableType.setFileType("csv");
+            }
+            if(ctx.type().K_JSON() != null){
+            tableType.setFileType("json");
+            }
+
+        }
+        if(ctx.path() != null){
+            if(ctx.path().any_name() != null){
+                tableType.setPath(ctx.path().any_name().getText());
+            }
+
+        }
 
         if (ctx.database_name() != null) {
             createStmt.setDataBaseName(ctx.database_name().any_name().getText());

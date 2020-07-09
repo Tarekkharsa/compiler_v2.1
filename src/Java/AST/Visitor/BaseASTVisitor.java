@@ -1,5 +1,6 @@
 package Java.AST.Visitor;
 
+import CodeGeneration.FileOperations;
 import Java.AST.DefAllObject;
 import Java.AST.Expr.*;
 import Java.AST.Function.*;
@@ -28,6 +29,10 @@ import Java.AST.QueryStmt.SelectStmt.*;
 import Java.Main;
 import Java.SymbolTable.*;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -44,7 +49,32 @@ public class BaseASTVisitor implements ASTVisitor {
             visit(sqlStmt);
         }
 
+
+
+        FileOperations operations = new FileOperations();
+        for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
+            File file = new File("C:\\Users\\Bcc\\Desktop\\Code Generation\\"+Main.symbolTable.getDeclaredTypes().get(i).getName()+".java");
+
+            try {
+                if(file.createNewFile()){
+                    System.out.println("new file name "+Main.symbolTable.getDeclaredTypes().get(i).getName());
+                    operations.writeFile(file ,Main.symbolTable.getDeclaredTypes().get(i).getColumns() , Main.symbolTable.getDeclaredTypes().get(i));
+                }else {
+                    operations.writeFile(file ,Main.symbolTable.getDeclaredTypes().get(i).getColumns() , Main.symbolTable.getDeclaredTypes().get(i));
+                    System.out.println("already exsiest file name "+Main.symbolTable.getDeclaredTypes().get(i).getName());
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        
+        
+        
     }
+
+
+
+
 
     @Override
     public void visit(DefAllObject defAllObject) {
@@ -1208,11 +1238,6 @@ public class BaseASTVisitor implements ASTVisitor {
             if(selectCore.getResultColumnList().size() > 1 ){
                 System.err.println("IN Clause if return more than one column");
             }
-//            for (int i = 0; i < selectCore.getScope().getParent().getSymbols().size(); i++) {
-//
-//            System.out.println(selectCore.getScope().getParent().getSymbols().get(i).getName());
-//            System.out.println(selectCore.getScope().getParent().getSymbols().get(i).getType().getName());
-//            }
         }
 
         if(HavingName && !LiteralValueName){

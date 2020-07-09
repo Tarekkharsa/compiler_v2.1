@@ -167,6 +167,18 @@ public interface SQLVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCreate_table_stmt(SQLParser.Create_table_stmtContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link SQLParser#type}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitType(SQLParser.TypeContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#path}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPath(SQLParser.PathContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link SQLParser#create_type_stmt}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

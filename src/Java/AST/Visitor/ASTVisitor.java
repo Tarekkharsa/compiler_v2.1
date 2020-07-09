@@ -25,4 +25,5 @@ public interface ASTVisitor {
     public void visit(FactoredSelectStmt factoredSelectStmt);
     public void visit(AlterTableStmt alterTableStmt);
     public void visit(CreateType createType);
+
 }
