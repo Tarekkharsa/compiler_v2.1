@@ -2447,9 +2447,12 @@ public class BaseVisitor extends SQLBaseVisitor {
             }
 
             if (expr.getSql_stmt_list() != null){
-                String typeName = "Sql";
+
+                String typeName = varName+"_"+expr.getSql_stmt_list().get(0).getFactoredSelectStmt().getSelectCore().getTableOrSubQueries().get(0).getTableName(); ;
+
                 type.setName(typeName);
             }
+            Main.symbolTable.getDeclaredTypes().add(type);
 
             if (expr.getFunctionName() != null){
                 String typeName = "function";

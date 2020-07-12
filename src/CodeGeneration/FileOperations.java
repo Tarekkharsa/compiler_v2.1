@@ -56,32 +56,34 @@ public class FileOperations {
             pr.append("\n\t\t}\n\n");
 
             // constructor with parameters
-            AtomicInteger paramCount = new AtomicInteger();
-            pr.append("\tpublic ").append(tableName.getName()).append("(");
-            columns.forEach((key, value) -> {
-                if (value.getName().equals("number")) {
-                    pr.append("double ").append(key).append("");
-                    paramCount.getAndIncrement();
-                } else if (value.getName().equals("string")) {
-                    paramCount.getAndIncrement();
-                    pr.append("String ").append(key).append("");
-                } else if (value.getName().equals("boolean")) {
-                    paramCount.getAndIncrement();
-                    pr.append("boolean ").append(key).append("");
-                } else {
-                    pr.append(value.getName()).append(" ").append(key).append("");
-                    paramCount.getAndIncrement();
-                }
-            if(paramCount.get() != columns.size() ){
-                pr.append(",");
+            if (columns.size() > 0) {
+                AtomicInteger paramCount = new AtomicInteger();
+                pr.append("\tpublic ").append(tableName.getName()).append("(");
+                columns.forEach((key, value) -> {
+                    if (value.getName().equals("number")) {
+                        pr.append("double ").append(key).append("");
+                        paramCount.getAndIncrement();
+                    } else if (value.getName().equals("string")) {
+                        paramCount.getAndIncrement();
+                        pr.append("String ").append(key).append("");
+                    } else if (value.getName().equals("boolean")) {
+                        paramCount.getAndIncrement();
+                        pr.append("boolean ").append(key).append("");
+                    } else {
+                        pr.append(value.getName()).append(" ").append(key).append("");
+                        paramCount.getAndIncrement();
+                    }
+                    if (paramCount.get() != columns.size()) {
+                        pr.append(",");
+                    }
+                });
+                pr.append(") \n");
+                pr.append("\t\t{\n");
+                columns.forEach((key, value) -> {
+                    pr.append("\t\t\tthis.").append(key).append(" = ").append(key).append(";\n");
+                });
+                pr.append("\n\t\t}\n\n");
             }
-            });
-            pr.append(") \n");
-            pr.append("\t\t{\n");
-            columns.forEach((key, value) -> {
-                pr.append("\t\t\tthis.").append(key).append(" = ").append(key).append(";\n");
-            });
-            pr.append("\n\t\t}\n\n");
 
 
             // load data function
@@ -118,34 +120,35 @@ public class FileOperations {
                             pr.append("attributes[" + i + "]");
                             i.getAndIncrement();
                             z.getAndIncrement();
-                        } else {
-                            z.getAndIncrement();
-                            pr.append("\n\t\t\t\tnew " + value.getName() + "(");
-                            AtomicInteger x = new AtomicInteger();
-                            for (int i1 = 0; i1 < Main.symbolTable.getDeclaredTypes().size(); i1++) {
-                                if (Main.symbolTable.getDeclaredTypes().get(i1).getName().equals(value.getName())) {
-                                    int finalI = i1;
-                                    Main.symbolTable.getDeclaredTypes().get(i1).getColumns().forEach((key1, value2) -> {
-//                                        pr.append("attributes[").append(String.valueOf(i)).append("]");
-                                        if (value2.getName().equals("number")) {
-                                            pr.append(" Double.parseDouble(attributes[").append(String.valueOf(i)).append("].replace(\"\\\"\",\" \"))");
-
-                                        } else{
-                                            pr.append("attributes[").append(String.valueOf(i)).append("]");
-                                        }
-                                        x.getAndIncrement();
-                                        i.getAndIncrement();
-                                        if(x.get() != Main.symbolTable.getDeclaredTypes().get(finalI).getColumns().size()){
-                                        pr.append(",");
-                                        }
-                                    });
-                                }
-                            }
-                            pr.append(")");
-
-
                         }
-                        if(z.get() != columns.size()){
+//                        else {
+//                            z.getAndIncrement();
+//                            pr.append("\n\t\t\t\tnew " + value.getName() + "(");
+//                            AtomicInteger x = new AtomicInteger();
+//                            for (int i1 = 0; i1 < Main.symbolTable.getDeclaredTypes().size(); i1++) {
+//                                if (Main.symbolTable.getDeclaredTypes().get(i1).getName().equals(value.getName())) {
+//                                    int finalI = i1;
+//                                    Main.symbolTable.getDeclaredTypes().get(i1).getColumns().forEach((key1, value2) -> {
+////                                        pr.append("attributes[").append(String.valueOf(i)).append("]");
+//                                        if (value2.getName().equals("number")) {
+//                                            pr.append(" Double.parseDouble(attributes[").append(String.valueOf(i)).append("].replace(\"\\\"\",\" \"))");
+//
+//                                        } else{
+//                                            pr.append("attributes[").append(String.valueOf(i)).append("]");
+//                                        }
+//                                        x.getAndIncrement();
+//                                        i.getAndIncrement();
+//                                        if(x.get() != Main.symbolTable.getDeclaredTypes().get(finalI).getColumns().size()){
+//                                        pr.append(",");
+//                                        }
+//                                    });
+//                                }
+//                            }
+//                            pr.append(")");
+//
+//
+//                        }
+                        if (z.get() != columns.size()) {
                             pr.append(",");
                         }
                     });

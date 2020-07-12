@@ -2,7 +2,7 @@ package Java.SymbolTable;
 
 import java.util.ArrayList;
 
-class AggregationFunction extends Type{
+public  class AggregationFunction extends Type{
     protected String AggregationFunctionName;
     protected String JarPath;
     protected String ClassName;

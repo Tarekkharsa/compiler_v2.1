@@ -1,5 +1,6 @@
 package Java.AST.Visitor;
 
+import CodeGeneration.ExecuteQuery;
 import CodeGeneration.FileOperations;
 import Java.AST.DefAllObject;
 import Java.AST.Expr.*;
@@ -53,23 +54,1219 @@ public class BaseASTVisitor implements ASTVisitor {
 
         FileOperations operations = new FileOperations();
         for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
-            File file = new File("C:\\Users\\Bcc\\Desktop\\Code Generation\\"+Main.symbolTable.getDeclaredTypes().get(i).getName()+".java");
+            File file = new File("C:\\Users\\Bcc\\Desktop\\CompilerTest\\src\\"+Main.symbolTable.getDeclaredTypes().get(i).getName()+".java");
 
             try {
                 if(file.createNewFile()){
-                    System.out.println("new file name "+Main.symbolTable.getDeclaredTypes().get(i).getName());
+//                    System.out.println("new file name "+Main.symbolTable.getDeclaredTypes().get(i).getName());
                     operations.writeFile(file ,Main.symbolTable.getDeclaredTypes().get(i).getColumns() , Main.symbolTable.getDeclaredTypes().get(i));
                 }else {
                     operations.writeFile(file ,Main.symbolTable.getDeclaredTypes().get(i).getColumns() , Main.symbolTable.getDeclaredTypes().get(i));
-                    System.out.println("already exsiest file name "+Main.symbolTable.getDeclaredTypes().get(i).getName());
+//                    System.out.println("already exsiest file name "+Main.symbolTable.getDeclaredTypes().get(i).getName());
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+
+
+        for (int i = 0; i < Main.symbolTable.getScopes().size(); i++) {
+            System.out.println("Scope Id :"+Main.symbolTable.getScopes().get(i).getId());
+            if(Main.symbolTable.getScopes().get(i).getParent() != null){
+
+            System.out.println("Scope Parent :"+Main.symbolTable.getScopes().get(i).getParent().getId());
+            }
+            for (int i1 = 0; i1 < Main.symbolTable.getScopes().get(i).getSymbols().size(); i1++) {
+                System.out.println("symbole name :"+Main.symbolTable.getScopes().get(i).getSymbols().get(i1).getName()+" type:  "
+                +Main.symbolTable.getScopes().get(i).getSymbols().get(i1).getType().getName());
+
+            }
+        }
+//        if(Main.selectCore != null){
+//            if(Main.selectCore.getTableOrSubQueries() != null){
+//
+//            }
+//
+//        }
         
         
         
+    }
+
+
+
+
+
+    static String tableName;
+     boolean HavingName;
+     boolean OrderBy;
+     boolean LiteralValueName;
+     boolean GroupBy;
+     int FunctionCount;
+     boolean WhereIN;
+     int Line;
+     int Col;
+
+
+    private void printSelectCore(SelectCore selectCore) {
+
+        if(selectCore != null){
+            Main.selectCore = selectCore;
+//            System.out.println("selectCore");
+        }
+        if (selectCore.getJoinClause() != null) {
+            printJoinClause(selectCore.getJoinClause());
+        }
+        if (selectCore.getSELECT() != null) {
+//            System.out.println(selectCore.getSELECT());
+        }
+        if (selectCore.getTableOrSubQueries() != null) {
+            for (int i = 0; i < selectCore.getTableOrSubQueries().size(); i++) {
+                printTableOrSubQueries(selectCore.getTableOrSubQueries().get(i));
+            }
+        }
+        if (selectCore.getResultColumnList() != null) {
+            for (int i = 0; i < selectCore.getResultColumnList().size(); i++) {
+                printResultColumns(selectCore.getResultColumnList().get(i));
+            }
+        }
+        if (selectCore.getFrom() != null) {
+//            System.out.println(selectCore.getFrom());
+        }
+
+
+        if (selectCore.getWhere() != null) {
+//            System.out.println(selectCore.getWhere());
+        }
+
+        if (selectCore.getGroupBy() != null ) {
+            printGroupBy(selectCore.getGroupBy());
+        }
+
+        if (selectCore.getExprs() != null) {
+            for (int i = 0; i < selectCore.getExprs().size(); i++) {
+                printExpr(selectCore.getExprs().get(i));
+            }
+        }
+
+
+
+        if (selectCore.getAll() != null) {
+//            System.out.println(selectCore.getAll());
+        }
+
+
+        if (selectCore.getDISTINCT() != null) {
+//            System.out.println(selectCore.getDISTINCT());
+        }
+
+        if (selectCore.getVALUES() != null) {
+//            System.out.println(selectCore.getVALUES());
+        }
+        if (selectCore.getHAVING() != null) {
+//            System.out.println(selectCore.getHAVING());
+            printHaving(selectCore.getHAVING());
+
+
+        }
+
+
+        /////// semantic check
+        if (selectCore.getScope().getParent() != null && WhereIN) {
+            if(selectCore.getResultColumnList().size() > 1 ){
+                System.err.println("IN Clause if return more than one column");
+            }
+        }
+
+        if(HavingName && !LiteralValueName){
+            System.err.println("Error Having clause contains only grouping functions");
+        }
+
+        if(!OrderBy){
+                if (GroupBy && HavingName ) {
+                    if(FunctionCount == 2){
+                        System.err.println(" Group by clause can’t contain aggregate function");
+                    }
+                }
+                if(GroupBy && !HavingName){
+                    if(FunctionCount > 0){
+                        System.err.println(" Group by clause can’t contain aggregate function");
+
+                    }
+                }
+            }
+
+
+    }
+
+    private void printGroupBy(Java.AST.QueryStmt.SelectStmt.GroupBy groupBy) {
+        if(groupBy.getBy() != null){
+
+        }
+        if(groupBy.getGROUP() != null){
+            GroupBy = true;
+        }
+        if(groupBy.getExpr() != null){
+            printExpr(groupBy.getExpr());
+        }
+    }
+
+    private void printHaving(Having having) {
+        if(having.getK_Having() != null){
+            HavingName = true;
+        }
+        if(having.getExpr() != null){
+            printExpr(having.getExpr());
+        }
+    }
+
+
+
+
+
+    private void printAlterTableAddConstraint(AlterTableAddConstraint alterTableAddConstraint) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast alterTableAddConstraint");
+        if (alterTableAddConstraint.getName() != null) {
+//            System.out.println(alterTableAddConstraint.getName());
+        }
+
+        if (alterTableAddConstraint.getAdd() != null) {
+//            System.out.println(alterTableAddConstraint.getAdd());
+        }
+        if (alterTableAddConstraint.getConstraint() != null) {
+//            System.out.println(alterTableAddConstraint.getConstraint());
+        }
+        if (alterTableAddConstraint.getTableConstraint() != null) {
+            printTableConstraints(alterTableAddConstraint.getTableConstraint());
+        }
+    }
+
+    private void printAlterTableAdd(AlterTableAdd alterTableAdd) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast alterTableAdd");
+        if (alterTableAdd.getAdd() != null) {
+//            System.out.println(alterTableAdd.getAdd());
+        }
+        if (alterTableAdd.getTableConstraint() != null) {
+            printTableConstraints(alterTableAdd.getTableConstraint());
+        }
+    }
+
+    private void printQualifiedTableName(QualifiedTableName qualifiedTableName) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast qualifiedTableName");
+        if (qualifiedTableName.getDataBaseName() != null) {
+//            System.out.println(qualifiedTableName.getDataBaseName());
+        }
+        if (qualifiedTableName.getTableName() != null) {
+//            System.out.println(qualifiedTableName.getTableName());
+        }
+        if (qualifiedTableName.getIndexName() != null) {
+//            System.out.println(qualifiedTableName.getIndexName());
+        }
+
+    }
+
+    private void printExprVar(Expr expr, Symbol varSymbol) {
+        if (expr == null) {
+            return;
+        }
+
+        if (expr.getColumnName() != null) {
+            AnyName anyName = new AnyName();
+            anyName.setIDENTIFIER(expr.getColumnName());
+            ScopeChecker scopeChecker = getAllParentScopes(currentScope,anyName,new ScopeChecker());
+            if (!scopeChecker.isFound()) {
+                System.err.println("Error in line: "+expr.getLine()+" "+anyName.getIDENTIFIER() + " is not found");
+            }
+
+            if (scopeChecker.isFound() && !scopeChecker.isAssigned()) {
+                System.err.println("Warning in line: "+expr.getLine()+" "+ anyName.getIDENTIFIER() + " is never assigned");
+            }
+
+            if (scopeChecker.getSymbol() != null && varSymbol != null){
+                if (varSymbol.getType() != null && scopeChecker.getSymbol().getType() != null) {
+                    if (!scopeChecker.getSymbol().getType().getName()
+                            .equals(varSymbol.getType().getName())) {
+                        System.err.println("Error in line: "+expr.getLine()+ " Type of first var doesn't equal type of second var");
+                    }
+                }
+            }
+        }
+        if (expr.getLiteralValue() != null) {
+            printLiteralValue(expr.getLiteralValue());
+
+            if(varSymbol != null) {
+                if (varSymbol.getType() != null) {
+                    if (!varSymbol.getType().getName()
+                            .equals(varType)) {
+                        System.err.println("Error in line: "+expr.getLine()+ " Type of first var doesn't equal type of second var");
+                    }
+                }
+            }
+        }
+
+        if (expr.getSelectStmt() != null) {
+            printSelectStmt(expr.getSelectStmt());
+        }
+        if (expr.getSql_stmt_list() != null) {
+            for (int i = 0; i < expr.getSql_stmt_list().size(); i++) {
+                visit(expr.getSql_stmt_list().get(i));
+            }
+        }
+        if (expr.getExprs() != null) {
+            for (int i = 0; i < expr.getExprs().size(); i++) {
+                printExprVar(expr.getExprs().get(i),varSymbol);
+            }
+        }
+    }
+
+    List<String> list = new ArrayList<>();
+    List<String> listKey = new ArrayList<>();
+    private void printExpr(Expr expr) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast expr");
+        if (expr == null) {
+            return;
+        }
+
+
+        if (expr.getSql_stmt_list() != null) {
+            for (int i = 0; i < expr.getSql_stmt_list().size(); i++) {
+                visit(expr.getSql_stmt_list().get(i));
+            }
+        }
+        if(expr.getDatabaseName() != null){
+//            System.out.println("DatabaseName : "+expr.getDatabaseName());
+        }
+        if(expr.getTableName() != null){
+//            System.out.println("TableName : "+expr.getTableName());
+//            tableName = expr.getTableName();
+            checkIfTableExists(expr.getTableName(),expr.getLine(),expr.getCol());
+        }
+
+        if(expr.getFunctionName() != null){
+
+            if (GroupBy) {
+
+                FunctionCount++;
+            }
+        }
+
+        if (expr.getColumnName() != null) {
+
+            if (WhereIN ) {
+//            System.out.println(tableName+expr.getColumnName());
+                for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
+                    String name = Main.symbolTable.getDeclaredTypes().get(i).getName();
+                    Main.symbolTable.getDeclaredTypes().get(i).getColumns().forEach((key, value) -> {
+                        if (key.equals(expr.getColumnName()) && name.equals(tableName) ) {
+                            list.add(value.getName());
+                            listKey.add(key);
+                        }
+
+                    });
+
+                }
+
+                if (list.size() == 2) {
+                    if (!list.get(0).equals(list.get(1))){
+                        System.err.println("Error in line "+expr.getLine()+" Also "+listKey.get(0)+" and "+listKey.get(1)+" should be from the same type");
+                    }
+                }
+
+
+            }
+
+
+        }
+
+        if (expr.getLiteralValue() != null  ) {
+
+            if(HavingName){
+
+                LiteralValueName = true;
+            }
+
+            printLiteralValue(expr.getLiteralValue());
+
+
+        }
+        if(expr.getK_IN() != null){
+            WhereIN = true;
+        }
+
+        if (expr.getUnaryOperator() != null ) {
+            printUnaryOperator(expr.getUnaryOperator());
+        }
+        if (expr.getOperation() != null) {
+//            for (int i = 0; i < expr.getOperation().size(); i++) {
+////                System.out.println("Operation : " +expr.getOperation().get(i));
+//            }
+        }
+        if (expr.getSelectStmt() != null) {
+            printSelectStmt(expr.getSelectStmt());
+        }
+        if (expr.getExprs() != null ) {
+            for (int i = 0; i < expr.getExprs().size(); i++) {
+                printExpr(expr.getExprs().get(i));
+            }
+        }
+
+        if ( expr.getColumnName() !=null && tableName != null) {
+
+            if(Main.symbolTable.getDeclaredTypes().size() > 0){
+                for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
+                    if (Main.symbolTable.getDeclaredTypes().get(i).getName().equals(tableName)) {
+                        checkColInTable(expr.getColumnName() , tableName ,expr.getLine());//////////// test
+                    }
+                }
+            }
+        }
+
+
+    }
+
+    private ScopeChecker printExprInlineCond(Expr expr, ScopeChecker scopeChecker, List<Symbol> symbols) {
+        if (expr == null) {
+            return scopeChecker;
+        }
+
+        if (expr.getExprs() != null) {
+            if (expr.getExprs().size() > 0) {
+                for (int i = 0; i < expr.getExprs().size(); i++) {
+                    scopeChecker = printExprInlineCond(expr.getExprs().get(i), scopeChecker,symbols);
+                }
+            }
+        }
+
+        if (expr.getColumnName() != null) {
+            if (currentScope != null) {
+                AnyName anyName = new AnyName();
+                anyName.setIDENTIFIER(expr.getColumnName());
+                scopeChecker = getAllParentScopes(currentScope, anyName,new ScopeChecker());
+                if (!scopeChecker.isFound()) {
+                    System.err.println("Error in line:"+expr.getLine()+" "+anyName.getIDENTIFIER() + " is not found");
+                }
+
+                if (scopeChecker.isFound()){
+                    symbols.add(scopeChecker.getSymbol());
+                }
+
+                if (scopeChecker.isFound() && !scopeChecker.isAssigned()){
+                    System.err.println("Warning in line:"+expr.getLine()+" "+anyName.getIDENTIFIER() + " is never assigned");
+                }
+            }
+        }
+        if (expr.getLiteralValue() != null) {
+            printLiteralValue(expr.getLiteralValue(),symbols);
+        }
+
+        if (expr.getSelectStmt() != null) {
+            printSelectStmt(expr.getSelectStmt());
+        }
+
+        return scopeChecker;
+    }
+
+    private void printExpr(Expr_Print expr) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast expr");
+        if (expr == null) {
+            return;
+        }
+
+        if (expr.getDatabaseName() != null) {
+//            System.out.println("DatabaseName : "+expr.getDatabaseName());
+        }
+        if (expr.getTableName() != null) {
+//            System.out.println("TableName : "+expr.getTableName());
+        }
+        if (expr.getFunctionName() != null) {
+//            System.out.println("FunctionName : "+expr.getFunctionName());
+        }
+
+        if (expr.getColumnName() != null) {
+//            System.out.println("Expr : "+expr.getColumnName());
+            return;
+        }
+        if (expr.getLiteralValue() != null) {
+            printLiteralValue(expr.getLiteralValue());
+        }
+        if (expr.getUnaryOperator() != null) {
+            printUnaryOperator(expr.getUnaryOperator());
+        }
+        if (expr.getOperation() != null) {
+            for (int i = 0; i < expr.getOperation().size(); i++) {
+//                System.out.println("Operation : " +expr.getOperation().get(i));
+            }
+        }
+        if (expr.getSelectStmt() != null) {
+            printSelectStmt(expr.getSelectStmt());
+        }
+    }
+
+    private void printExprForAndOperator(Expr_for_and_operator expr, boolean isKeyVarExist) {
+        if (expr == null) {
+            return;
+        }
+
+        if (expr.getLiteralValue() != null) {
+            printLiteralValue(expr.getLiteralValue());
+        }
+
+        if (expr.getExpr_for_and_operator() != null) {
+            printExprForAndOperator(expr.getExpr_for_and_operator(),isKeyVarExist);
+        }
+
+        if (expr.getAnyName() != null) {
+            List<Symbol> symbols = new ArrayList<>();
+            printAnyNameExprIfAndJavaOther(expr.getAnyName(),true,symbols, expr.getLine());
+        }
+
+        if (expr.getExprVarInit() != null){
+            printExprForVarInit(expr.getExprVarInit(),isKeyVarExist);
+        }
+    }
+
+    private void printExprForVarInit(ExprVarInit exprVarInit, boolean isKeyVarExist) {
+        Symbol varSymbol = new Symbol();
+
+        if (exprVarInit.getCurrentScope() != null) {
+            currentScope = exprVarInit.getCurrentScope();
+        }
+
+        if (!isKeyVarExist) {
+            if (exprVarInit.getAnyName() != null) {
+                List<Symbol> symbols = new ArrayList<>();
+                ScopeChecker scopeChecker = printAnyNameExprIfAndJavaOther(exprVarInit.getAnyName(), true,symbols,exprVarInit.getLine());
+                varSymbol = scopeChecker.getSymbol();
+            }
+
+            if (exprVarInit.getExpr() != null) {
+                printExprVar(exprVarInit.getExpr(), varSymbol);
+            }
+        }
+    }
+
+
+    private ScopeChecker printExprIf(Expr_if expr, boolean isInsideForStmt, ScopeChecker scopeChecker,List<Symbol> symbols) {
+        if (expr == null) {
+            return new ScopeChecker();
+        }
+
+        if (expr.getLiteralValue() != null) {
+            printLiteralValue(expr.getLiteralValue(),symbols);
+        }
+
+        if (expr.getOperation() != null) {
+            for (int i = 0; i < expr.getOperation().size(); i++) {
+            }
+        }
+
+        if (expr.getExpr_ifs() != null){
+            for (int i = 0; i < expr.getExpr_ifs().size(); i++) {
+                scopeChecker = printExprIf(expr.getExpr_ifs().get(i),isInsideForStmt,scopeChecker,symbols);
+            }
+        }
+
+        if (expr.getAnyNames() != null) {
+            for (int i = 0; i < expr.getAnyNames().size(); i++) {
+                if (isInsideForStmt)
+                    scopeChecker = printAnyNameExprIfAndJavaOther(expr.getAnyNames().get(i),true,symbols,expr.getLine());
+                else
+                    scopeChecker = printAnyNameExprIfAndJavaOther(expr.getAnyNames().get(i),false,symbols,expr.getLine());
+            }
+        }
+        return scopeChecker;
+    }
+
+    private ScopeChecker printExprWhile(Expr_while expr, ScopeChecker scopeChecker,List<Symbol> symbols ) {
+        if (expr == null) {
+            return new ScopeChecker();
+        }
+
+        if (expr.getLiteralValue() != null) {
+            printLiteralValue(expr.getLiteralValue(),symbols);
+        }
+
+        if (expr.getExpr_while() != null) {
+            for (int i = 0; i < expr.getExpr_while().size(); i++) {
+                scopeChecker = printExprWhile(expr.getExpr_while().get(i),scopeChecker,symbols);
+            }
+        }
+
+        if (expr.getAnyNamesList() != null) {
+            for (int i = 0; i < expr.getAnyNamesList().size(); i++) {
+                scopeChecker = printAnyNameExprIfAndJavaOther(expr.getAnyNamesList().get(i),false,symbols,expr.getLine());
+            }
+        }
+
+        return scopeChecker;
+    }
+
+    private void printUnaryOperator(UnaryOperator unaryOperator) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast unaryOperator");
+        if (unaryOperator.getNot() != null) {
+//            System.out.println("Operator : "+ unaryOperator.getNot());
+        }
+        if (unaryOperator.getMinus() != null) {
+//            System.out.println("Operator : "+ unaryOperator.getMinus());
+        }
+        if (unaryOperator.getPlus() != null) {
+//            System.out.println("Operator : "+ unaryOperator.getPlus());
+        }
+        if (unaryOperator.getTilde() != null) {
+//            System.out.println("Operator : "+ unaryOperator.getTilde());
+        }
+    }
+
+    private void printLiteralValue(LiteralValue literalValue, List<Symbol> symbols) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast literalValue");
+        if (literalValue.getCurrentTimeStamp() != null) {
+//            System.out.println(literalValue.getCurrentTimeStamp());
+        }
+        if (literalValue.getCurrentTime() != null) {
+//            System.out.println(literalValue.getCurrentTime() );
+        }
+        if (literalValue.getNullValue() != null) {
+//            System.out.println(literalValue.getNullValue() );
+        }
+        if (literalValue.getBlobValue() != null) {
+//            System.out.println(literalValue.getBlobValue() );
+        }
+        Symbol s = new Symbol();
+        if (literalValue.getNumericalValue() != null) {
+            varType = Type.NUMBER_CONST; // this for for_stmt
+            Type type = new Type();
+            type.setName(varType);
+            s.setType(type);
+            s.setName("literal number");
+            symbols.add(s);
+        }
+        if (literalValue.getStringValue() != null) {
+            varType = Type.STRING_CONST; // this for for_stmt
+            Type type = new Type();
+            type.setName(varType);
+            s.setType(type);
+            s.setName("literal string");
+            symbols.add(s);
+        }
+    }
+
+    private void printLiteralValue(LiteralValue literalValue) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast literalValue");
+        if (literalValue.getCurrentTimeStamp() != null) {
+//            System.out.println(literalValue.getCurrentTimeStamp());
+        }
+        if (literalValue.getCurrentTime() != null) {
+//            System.out.println(literalValue.getCurrentTime() );
+        }
+        if (literalValue.getNullValue() != null) {
+//            System.out.println(literalValue.getNullValue() );
+        }
+        if (literalValue.getBlobValue() != null) {
+//            System.out.println(literalValue.getBlobValue() );
+        }
+        if (literalValue.getNumericalValue() != null) {
+            varType = Type.NUMBER_CONST; // this for for_stmt
+        }
+        if (literalValue.getStringValue() != null) {
+            varType = Type.STRING_CONST; // this for for_stmt
+        }
+    }
+
+    private void printSelectOrValues(SelectOrValues selectOrValues) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast selectOrValues");
+        if (selectOrValues.getResultColumns() != null) {
+            for (int i = 0; i < selectOrValues.getResultColumns().size(); i++) {
+                printResultColumns(selectOrValues.getResultColumns().get(i));
+
+            }
+        }
+        if (selectOrValues.getFrom() != null) {
+//            System.out.println(selectOrValues.getFrom());
+        }
+        if (selectOrValues.getJoinClause() != null) {
+            printJoinClause(selectOrValues.getJoinClause());
+        }
+        if (selectOrValues.getTableOrSubQueries() != null) {
+            for (int i = 0; i < selectOrValues.getTableOrSubQueries().size(); i++) {
+                printTableOrSubQueries(selectOrValues.getTableOrSubQueries().get(i));
+            }
+        }
+        if (selectOrValues.getExpr() != null) {
+            for (int i = 0; i < selectOrValues.getExpr().size(); i++) {
+                printExpr(selectOrValues.getExpr().get(i));
+            }
+        }
+
+    }
+
+    private void printTableOrSubQueries(TableOrSubQuery tableOrSubQuery) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast tableOrSubQuery");
+        if (tableOrSubQuery == null) {
+            return;
+        }
+        if (tableOrSubQuery.getDataBaseName() != null) {
+//            System.out.println(tableOrSubQuery.getDataBaseName());
+        }
+        if (tableOrSubQuery.getTableName() != null) {
+//            System.out.println("TableName : "+tableOrSubQuery.getTableName());
+            tableName = tableOrSubQuery.getTableName();
+
+            checkIfTableExists(tableOrSubQuery.getTableName() ,tableOrSubQuery.getLine() , tableOrSubQuery.getCol());
+        }
+        if (tableOrSubQuery.getIndexName() != null) {
+//            System.out.println("IndexName : "+tableOrSubQuery.getIndexName());
+        }
+        if (tableOrSubQuery.getResultColumn() != null) {
+            printResultColumns(tableOrSubQuery.getResultColumn());
+        }
+        if (tableOrSubQuery.getJoinClause() != null) {
+            printJoinClause(tableOrSubQuery.getJoinClause());
+        }
+        if (tableOrSubQuery.getSelectOrValues() != null) {
+            printSelectOrValues(tableOrSubQuery.getSelectOrValues());
+        }
+        if (tableOrSubQuery.getTableOrSubQueries() != null) {
+            for (int i = 0; i < tableOrSubQuery.getTableOrSubQueries().size(); i++) {
+                printTableOrSubQueries(tableOrSubQuery.getTableOrSubQueries().get(i));
+            }
+        }
+        if (tableOrSubQuery.getTableAlias() != null) {
+//            System.out.println(tableOrSubQuery.getTableAlias());
+        }
+    }
+
+    private void checkIfTableExists(String table , int line , int col){
+        AtomicBoolean checkTable = new AtomicBoolean(false);
+        for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
+            String name = Main.symbolTable.getDeclaredTypes().get(i).getName();
+            if ( name.equals(table)) {
+                checkTable.set(true);
+            }
+
+        }
+        if(!checkTable.get()){
+            System.err.println("Error in line:"+line +" col:"+col +" "+table+ " not found "  );
+        }
+    }
+
+    private void printJoinClause(JoinClause joinClause) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast joinClause");
+        if (joinClause.getJoinOperator() != null) {
+            for (int i = 0; i < joinClause.getJoinOperator().size(); i++) {
+                printJoinOperator(joinClause.getJoinOperator().get(i));
+            }
+        }
+        if (joinClause.getTableOrSubQuery() != null) {
+            for (int i = 0; i < joinClause.getTableOrSubQuery().size(); i++) {
+                printTableOrSubQueries(joinClause.getTableOrSubQuery().get(i));
+            }
+        }
+
+        if (joinClause.getJoinConstraint() != null) {
+            for (int i = 0; i < joinClause.getJoinConstraint().size(); i++) {
+                printJoinConstraint(joinClause.getJoinConstraint().get(i));
+            }
+        }
+
+    }
+
+    private void printJoinOperator(JoinOperator joinOperator) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast joinOperator");
+//        if (joinOperator.getJoin() != null) {
+////            System.out.println(joinOperator.getJoin());
+//        }
+        if (joinOperator.getInner() != null) {
+//            System.out.println(joinOperator.getInner() );
+        }
+        if (joinOperator.getOuter() != null) {
+//            System.out.println(joinOperator.getOuter());
+        }
+
+        if (joinOperator.getLeft() != null) {
+//            System.out.println(joinOperator.getLeft());
+        }
+    }
+
+    private void printJoinConstraint(JoinConstraint joinConstraint) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast joinConstraint");
+        if (joinConstraint.getName() != null) {
+//            System.out.println(joinConstraint.getName());
+        }else{
+            System.err.println("Error join doesn’t have ON statement with it");
+        }
+        if (joinConstraint.getExpr() != null) {
+            printExpr(joinConstraint.getExpr());
+        }
+    }
+
+    private void printResultColumns(ResultColumn resultColumn) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast resultColumn");
+        if (resultColumn.getTableName() != null) {
+//            System.out.println("TableName"+resultColumn.getTableName());
+//            tableName = resultColumn.getTableName(); /////////////////////////////////////////////////////////////
+        }
+        if (resultColumn.getColumnAlias() != null) {
+//            System.out.println("ColumnAlias : "+resultColumn.getColumnAlias());
+        }
+        if (resultColumn.getStar() != null) {
+//            System.out.println(resultColumn.getStar());
+            if(WhereIN){
+                System.err.println("Error IN Clause if return more than one column");
+            }
+//            ResultColumn = true;
+        }
+        if (resultColumn.getExpr() != null) {
+//                printExprResultColumn(resultColumn.getExpr());
+            printExpr(resultColumn.getExpr());
+        }
+
+
+    }
+
+    private void printExprResultColumn(Expr expr) {
+        if (expr.getColumnName() != null) {
+            AtomicBoolean check = new AtomicBoolean(false);
+            AtomicBoolean checkTable = new AtomicBoolean(false);
+//            System.out.println("Expr : "+expr.getColumnName());
+//            System.out.println("table NAME : "+tableName);
+            for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
+                String name = Main.symbolTable.getDeclaredTypes().get(i).getName();
+                Main.symbolTable.getDeclaredTypes().get(i).getColumns().forEach((key, value) -> {
+
+                    if ( name.equals(tableName)) {
+                        checkTable.set(true);
+                        if(expr.getColumnName().equals(key)){
+                            check.set(true);
+                        }
+                    }
+
+                });
+
+            }
+            if(tableName != null){
+                if(!checkTable.get()){
+//                   System.err.println(tableName+ " not found "  );
+                }else {
+                    if (!check.get()) {
+                        System.err.println("Error In Line :" + expr.getLine() +" "+expr.getColumnName() + " undefined Column in " + tableName );
+
+                    }
+                }
+            }
+
+
+        }
+    }
+
+    private void checkColInTable( String columnName ,String table , int Line ){
+        AtomicBoolean check = new AtomicBoolean(false);
+        AtomicBoolean checkTable = new AtomicBoolean(false);
+//            System.out.println("Expr : "+expr.getColumnName());
+//            System.out.println("table NAME : "+tableName);
+        for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
+            String name = Main.symbolTable.getDeclaredTypes().get(i).getName();
+            Main.symbolTable.getDeclaredTypes().get(i).getColumns().forEach((key, value) -> {
+
+                if ( name.equals(table)) {
+                    checkTable.set(true);
+                    if(columnName.equals(key)){
+                        check.set(true);
+                    }
+                }
+
+            });
+
+        }
+        if(table != null){
+            if(!checkTable.get()){
+                System.err.println("Error in line "+Line +" "+table+ " not found "  );
+            }else {
+                if (!check.get()) {
+                    System.err.println( "Error in line "+Line +" "+columnName + " undefined Column in " + table );
+
+                }
+            }
+        }
+    }
+
+    private void printOrderingTerm(OrderingTerm orderingTerm) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast orderingTerm");
+        if (orderingTerm.getExpr() != null) {
+            printExpr(orderingTerm.getExpr());
+        }
+        if (orderingTerm.getASC() != null) {
+//            System.out.println(orderingTerm.getASC());
+        }
+        if (orderingTerm.getDESC() != null) {
+//            System.out.println(orderingTerm.getDESC());
+        }
+    }
+
+    private void printColumnDefList(ColumnDef columnDef) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast columnDef");
+
+        if (columnDef.getColumnName() != null) {
+//            System.out.println("ColumnName : "+columnDef.getColumnName());
+        }
+        if (columnDef.getTypeName() != null) {
+            for (int i = 0; i < columnDef.getTypeName().size(); i++) {
+                printTypeName(columnDef.getTypeName().get(i));
+            }
+        }
+        if (columnDef.getColumnConstraint() != null) {
+            for (int i = 0; i < columnDef.getColumnConstraint().size(); i++) {
+                printColumnConstraint(columnDef.getColumnConstraint().get(i));
+            }
+        }
+
+
+    }
+
+    private void printTypeName(TypeName typeName) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast typeName");
+        if (typeName.getAnyNames() != null) {
+            for (int i = 0; i < typeName.getAnyNames().size(); i++) {
+                printAnyName(typeName.getAnyNames().get(i));
+
+            }
+        }
+        if (typeName.getName() != null) {
+            boolean check = false;
+//            System.out.println("typeName : " +typeName.getName());
+            for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
+//            System.out.println("Parent Type Name " + Main.symbolTable.getDeclaredTypes().get(i).getName());
+                if(typeName.getName().equals(Main.symbolTable.getDeclaredTypes().get(i).getName())){
+                    check = true;
+                }
+                if(typeName.getName().equals(Type.NUMBER_CONST)){
+                    check = true;
+                }
+                if(typeName.getName().equals(Type.STRING_CONST)){
+                    check = true;
+                }
+                if(typeName.getName().equals(Type.BOOLEAN_CONST)){
+                    check = true;
+                }
+            }
+            if (!check) {
+                System.err.println("Error in line: " + typeName.getLine()+" type " + typeName.getName() +" not Found");
+
+            }
+        }
+        if (typeName.getSignedNumbers() != null) {
+            for (int i = 0; i < typeName.getSignedNumbers().size(); i++) {
+                printSignedNumbers(typeName.getSignedNumbers().get(i));
+            }
+        }
+
+    }
+
+    private void printSignedNumbers(SignedNumber signedNumber) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast signedNumber");
+        if (signedNumber.getStar() != null) {
+//            System.out.println(signedNumber.getStar());
+        }
+        if (signedNumber.getMinus() != null) {
+//            System.out.println(signedNumber.getMinus());
+        }
+        if (signedNumber.getNumericLiteral() != null) {
+//            System.out.println(signedNumber.getNumericLiteral());
+        }
+        if (signedNumber.getPlus() != null) {
+//            System.out.println(signedNumber.getPlus());
+        }
+
+
+    }
+
+    public static String typeName;
+    private void printAnyName(AnyName anyName) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast anyName");
+        if (anyName == null) {
+            return;
+        }
+        if (anyName.getAnyName() != null) {
+            printAnyName(anyName.getAnyName());
+        }
+        if (anyName.getIDENTIFIER() != null) {
+//            System.out.println(anyName.getIDENTIFIER());
+            typeName = anyName.getIDENTIFIER();
+
+            if (anyName.getStrinagLiteral() != null) {
+//                System.out.println(anyName.getStrinagLiteral());
+            }
+            if (anyName.getKeyword() != null) {
+//                System.out.println(anyName.getKeyword());
+            }
+        }
+    }
+
+
+    private ScopeChecker printAnyNameExprIfAndJavaOther(AnyName anyName, boolean isForOrVar, List<Symbol> symbols ,int line ) {
+
+        if (anyName == null) {
+            return new ScopeChecker();
+        }
+        ScopeChecker scopeChecker = new ScopeChecker();
+        if (anyName.getAnyName() != null) {
+            printAnyNameExprIfAndJavaOther(anyName.getAnyName(),isForOrVar,symbols,line);
+        }
+        if (anyName.getIDENTIFIER() != null) {
+            varName = anyName.getIDENTIFIER();
+
+            if (currentScope != null) {
+                scopeChecker = getAllParentScopes(currentScope, anyName,new ScopeChecker());
+                if (!scopeChecker.isFound()) {
+                    System.err.println("Error in line: " +line+" "+anyName.getIDENTIFIER() + " is not found");
+                }
+
+                if (scopeChecker.isFound()){
+                    symbols.add(scopeChecker.getSymbol());
+                }
+
+                if (!isForOrVar) {
+                    if (scopeChecker.isFound() && !scopeChecker.isAssigned()) {
+                        System.err.println("Warning in line: " +line+" "+anyName.getIDENTIFIER() + " is never assigned");
+                    }
+                }
+            }
+        }
+
+        if (anyName.getStrinagLiteral() != null) {
+//            System.out.println(anyName.getStrinagLiteral());
+        }
+        if (anyName.getKeyword() != null) {
+//            System.out.println(anyName.getKeyword());
+        }
+
+        return scopeChecker;
+    }
+
+    private ScopeChecker getAllParentScopes(Scope scope, AnyName anyName, ScopeChecker scopeChecker) {
+        if (scope.getParent() != null) {
+
+            for (Symbol symbol : scope.getParent().getSymbols()) {
+                if (symbol.getName().equals(anyName.getIDENTIFIER()) && symbol.isHasKeyVar()) {
+                    scopeChecker.setFound(true);
+                    scopeChecker.setAssigned(symbol.isAssigned());
+                    scopeChecker.setSymbol(symbol);
+                    break;
+                }
+            }
+            if (!scopeChecker.isFound()) {
+                scopeChecker = getAllParentScopes(scope.getParent(), anyName,scopeChecker);
+            }
+        }
+
+        return scopeChecker;
+    }
+
+    private void printColumnConstraint(ColumnConstraint columnConstraint) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast columnConstraint");
+        if (columnConstraint.getColumnForeignKey() != null) {
+            printColumnForeignKey(columnConstraint.getColumnForeignKey());
+        }
+        if (columnConstraint.getColumnNotNull() != null) {
+            if (columnConstraint.getColumnNotNull().getNot() != null) {
+//            System.out.println(columnConstraint.getColumnNotNull().getNot());
+            }
+            if (columnConstraint.getColumnNotNull().getNull() != null) {
+//                System.out.println(columnConstraint.getColumnNotNull().getNull());
+            }
+        }
+        if (columnConstraint.getColumnNull() != null) {
+//            System.out.println(columnConstraint.getColumnNull().getNull());
+        }
+        if (columnConstraint.getColumnPrimaryKey() != null) {
+            printColumnPrimaryKey(columnConstraint.getColumnPrimaryKey());
+        }
+    }
+
+    private void printColumnPrimaryKey(ColumnPrimaryKey columnPrimaryKey) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast columnPrimaryKey");
+        if (columnPrimaryKey.getPRIMARY() != null) {
+//            System.out.println(columnPrimaryKey.getPRIMARY());
+        }
+        if (columnPrimaryKey.getKEY() != null) {
+//            System.out.println(columnPrimaryKey.getKEY());
+        }
+        if (columnPrimaryKey.getASC() != null) {
+//            System.out.println(columnPrimaryKey.getASC());
+        }
+        if (columnPrimaryKey.getDESC() != null) {
+//            System.out.println(columnPrimaryKey.getDESC());
+        }
+        if (columnPrimaryKey.getAUTOINCREMENT() != null) {
+//            System.out.println(columnPrimaryKey.getAUTOINCREMENT());
+        }
+
+    }
+
+    private void printColumnForeignKey(ColumnForeignKey columnForeignKey) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("columnForeignKey");
+        if (columnForeignKey.getForeignKeyClause() != null) {
+            printForeignKeyClause(columnForeignKey.getForeignKeyClause());
+        }
+    }
+
+    private void printForeignKeyClause(ForeignKeyClause foreignKeyClause) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast foreignKeyClause");
+        if (foreignKeyClause.getDatabaseName() != null) {
+//            System.out.println(foreignKeyClause.getDatabaseName());
+        }
+        if (foreignKeyClause.getFkTargetColumnName() != null) {
+            for (int i = 0; i < foreignKeyClause.getFkTargetColumnName().size(); i++) {
+//                System.out.println(foreignKeyClause.getFkTargetColumnName().get(i));
+            }
+        }
+        if (foreignKeyClause.getForeignTable() != null) {
+//            System.out.println(foreignKeyClause.getForeignTable());
+        }
+
+    }
+
+    private void printTableConstraints(TableConstraint tableConstraint) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast tableConstraint");
+        if (tableConstraint.getName() != null) {
+//            System.out.println(tableConstraint.getName());
+        }
+        if (tableConstraint.getForeignKeys() != null) {
+            printForeignkeys(tableConstraint.getForeignKeys());
+        }
+        if (tableConstraint.getTableConstraintKey() != null) {
+            printTableConstraintKey(tableConstraint.getTableConstraintKey());
+        }
+        if (tableConstraint.getTableConstraintPrimaryKey() != null) {
+            printTableConstraintPrimaryKey(tableConstraint.getTableConstraintPrimaryKey());
+        }
+        if (tableConstraint.getTableConstraintUnique() != null) {
+            printTableConstraintUnique(tableConstraint.getTableConstraintUnique());
+        }
+        if (tableConstraint.getCheckExpr() != null) {
+//            System.out.println( tableConstraint.getCheckExpr());
+        }
+        if (tableConstraint.getExpr() != null) {
+            printExpr(tableConstraint.getExpr());
+        }
+        if (tableConstraint.getConstraint() != null) {
+//            System.out.println(tableConstraint.getConstraint());
+        }
+    }
+
+    private void printTableConstraintUnique(TableConstraintUnique tableConstraintUnique) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast tableConstraintUnique");
+        if (tableConstraintUnique.getUNIQUE() != null) {
+//            System.out.println(tableConstraintUnique.getUNIQUE());
+        }
+        if (tableConstraintUnique.getKEY() != null) {
+//            System.out.println(tableConstraintUnique.getKEY());
+        }
+        if (tableConstraintUnique.getIndexedColumn() != null) {
+            for (int i = 0; i < tableConstraintUnique.getIndexedColumn().size(); i++) {
+                printIndexedColumn(tableConstraintUnique.getIndexedColumn().get(i));
+            }
+        }
+        if (tableConstraintUnique.getName() != null) {
+//            System.out.println(tableConstraintUnique.getName());
+        }
+    }
+
+    private void printTableConstraintPrimaryKey(PrimaryKey tableConstraintPrimaryKey) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast tableConstraintPrimaryKey");
+        if (tableConstraintPrimaryKey.getName() != null) {
+//            System.out.println(tableConstraintPrimaryKey.getName());
+        }
+        if (tableConstraintPrimaryKey.getIndexedColumn() != null) {
+            for (int i = 0; i < tableConstraintPrimaryKey.getIndexedColumn().size(); i++) {
+                printIndexedColumn(tableConstraintPrimaryKey.getIndexedColumn().get(i));
+            }
+        }
+
+
+    }
+
+    private void printIndexedColumn(IndexedColumn indexedColumn) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast indexedColumn");
+        if (indexedColumn.getColumnName() != null) {
+//            System.out.println("ColumnName : "+indexedColumn.getColumnName());
+        }
+        if (indexedColumn.getASC() != null) {
+//            System.out.println(indexedColumn.getASC());
+        }
+        if (indexedColumn.getDESC() != null) {
+//            System.out.println(indexedColumn.getDESC());
+        }
+        if (indexedColumn.getCOLLATE() != null) {
+//            System.out.println(indexedColumn.getCOLLATE());
+        }
+        if (indexedColumn.getCollationName() != null) {
+//            System.out.println("CollationName : "+indexedColumn.getCollationName());
+        }
+
+    }
+
+    private void printTableConstraintKey(TableConstraintKey tableConstraintKey) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast tableConstraintKey");
+        if (tableConstraintKey.getName() != null) {
+//            System.out.println(tableConstraintKey.getName());
+        }
+    }
+
+    private void printForeignkeys(ForeignKey foreignKeys) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast foreignKeys");
+        if (foreignKeys.getForeignKeyClause() != null) {
+            printForeignKeyClause(foreignKeys.getForeignKeyClause());
+        }
+    }
+
+    private void printSelectStmt(SelectStmt selectStmt) {
+//        System.out.println("--------------------------------------");
+//        System.out.println("ast selectStmt");
+        if (selectStmt.getExpr() != null) {
+            for (int i = 0; i < selectStmt.getExpr().size(); i++) {
+                printExpr(selectStmt.getExpr().get(i));
+            }
+        }
+        if (selectStmt.getFromItem() != null) {
+//            System.out.println("FromItem : "+selectStmt.getFromItem());
+        }
+        if (selectStmt.getSelectOrValues() != null) {
+            printSelectOrValues(selectStmt.getSelectOrValues());
+        }
+        if (selectStmt.getOrderingTerm() != null) {
+            for (int i = 0; i < selectStmt.getOrderingTerm().size(); i++) {
+//                System.out.println(selectStmt.getOrderingTerm().get(i));
+            }
+        }
     }
 
 
@@ -1162,1168 +2359,6 @@ public class BaseASTVisitor implements ASTVisitor {
 //            });
 //        }
 
-    }
-
-
-    static String tableName;
-     boolean HavingName;
-     boolean OrderBy;
-     boolean LiteralValueName;
-     boolean GroupBy;
-     int FunctionCount;
-     boolean WhereIN;
-     int Line;
-     int Col;
-
-
-    private void printSelectCore(SelectCore selectCore) {
-
-        if (selectCore.getJoinClause() != null) {
-            printJoinClause(selectCore.getJoinClause());
-        }
-        if (selectCore.getSELECT() != null) {
-//            System.out.println(selectCore.getSELECT());
-        }
-        if (selectCore.getTableOrSubQueries() != null) {
-            for (int i = 0; i < selectCore.getTableOrSubQueries().size(); i++) {
-                printTableOrSubQueries(selectCore.getTableOrSubQueries().get(i));
-            }
-        }
-        if (selectCore.getResultColumnList() != null) {
-            for (int i = 0; i < selectCore.getResultColumnList().size(); i++) {
-                printResultColumns(selectCore.getResultColumnList().get(i));
-            }
-        }
-        if (selectCore.getFrom() != null) {
-//            System.out.println(selectCore.getFrom());
-        }
-
-
-        if (selectCore.getWhere() != null) {
-//            System.out.println(selectCore.getWhere());
-        }
-
-        if (selectCore.getGroupBy() != null ) {
-            printGroupBy(selectCore.getGroupBy());
-        }
-
-        if (selectCore.getExprs() != null) {
-            for (int i = 0; i < selectCore.getExprs().size(); i++) {
-                printExpr(selectCore.getExprs().get(i));
-            }
-        }
-
-
-
-        if (selectCore.getAll() != null) {
-//            System.out.println(selectCore.getAll());
-        }
-
-
-        if (selectCore.getDISTINCT() != null) {
-//            System.out.println(selectCore.getDISTINCT());
-        }
-
-        if (selectCore.getVALUES() != null) {
-//            System.out.println(selectCore.getVALUES());
-        }
-        if (selectCore.getHAVING() != null) {
-//            System.out.println(selectCore.getHAVING());
-            printHaving(selectCore.getHAVING());
-
-
-        }
-
-        if (selectCore.getScope().getParent() != null && WhereIN) {
-            if(selectCore.getResultColumnList().size() > 1 ){
-                System.err.println("IN Clause if return more than one column");
-            }
-        }
-
-        if(HavingName && !LiteralValueName){
-            System.err.println("Error Having clause contains only grouping functions");
-        }
-
-        if(!OrderBy){
-                if (GroupBy && HavingName ) {
-                    if(FunctionCount == 2){
-                        System.err.println(" Group by clause can’t contain aggregate function");
-                    }
-                }
-                if(GroupBy && !HavingName){
-                    if(FunctionCount > 0){
-                        System.err.println(" Group by clause can’t contain aggregate function");
-
-                    }
-                }
-            }
-
-
-    }
-
-    private void printGroupBy(Java.AST.QueryStmt.SelectStmt.GroupBy groupBy) {
-        if(groupBy.getBy() != null){
-
-        }
-        if(groupBy.getGROUP() != null){
-            GroupBy = true;
-        }
-        if(groupBy.getExpr() != null){
-            printExpr(groupBy.getExpr());
-        }
-    }
-
-    private void printHaving(Having having) {
-        if(having.getK_Having() != null){
-            HavingName = true;
-        }
-        if(having.getExpr() != null){
-            printExpr(having.getExpr());
-        }
-    }
-    private void printAlterTableAddConstraint(AlterTableAddConstraint alterTableAddConstraint) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast alterTableAddConstraint");
-        if (alterTableAddConstraint.getName() != null) {
-//            System.out.println(alterTableAddConstraint.getName());
-        }
-
-        if (alterTableAddConstraint.getAdd() != null) {
-//            System.out.println(alterTableAddConstraint.getAdd());
-        }
-        if (alterTableAddConstraint.getConstraint() != null) {
-//            System.out.println(alterTableAddConstraint.getConstraint());
-        }
-        if (alterTableAddConstraint.getTableConstraint() != null) {
-            printTableConstraints(alterTableAddConstraint.getTableConstraint());
-        }
-    }
-
-    private void printAlterTableAdd(AlterTableAdd alterTableAdd) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast alterTableAdd");
-        if (alterTableAdd.getAdd() != null) {
-//            System.out.println(alterTableAdd.getAdd());
-        }
-        if (alterTableAdd.getTableConstraint() != null) {
-            printTableConstraints(alterTableAdd.getTableConstraint());
-        }
-    }
-
-    private void printQualifiedTableName(QualifiedTableName qualifiedTableName) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast qualifiedTableName");
-        if (qualifiedTableName.getDataBaseName() != null) {
-//            System.out.println(qualifiedTableName.getDataBaseName());
-        }
-        if (qualifiedTableName.getTableName() != null) {
-//            System.out.println(qualifiedTableName.getTableName());
-        }
-        if (qualifiedTableName.getIndexName() != null) {
-//            System.out.println(qualifiedTableName.getIndexName());
-        }
-
-    }
-
-    private void printExprVar(Expr expr, Symbol varSymbol) {
-        if (expr == null) {
-            return;
-        }
-
-        if (expr.getColumnName() != null) {
-            AnyName anyName = new AnyName();
-            anyName.setIDENTIFIER(expr.getColumnName());
-            ScopeChecker scopeChecker = getAllParentScopes(currentScope,anyName,new ScopeChecker());
-            if (!scopeChecker.isFound()) {
-                System.err.println("Error in line: "+expr.getLine()+" "+anyName.getIDENTIFIER() + " is not found");
-            }
-
-            if (scopeChecker.isFound() && !scopeChecker.isAssigned()) {
-                System.err.println("Warning in line: "+expr.getLine()+" "+ anyName.getIDENTIFIER() + " is never assigned");
-            }
-
-            if (scopeChecker.getSymbol() != null && varSymbol != null){
-                if (varSymbol.getType() != null && scopeChecker.getSymbol().getType() != null) {
-                    if (!scopeChecker.getSymbol().getType().getName()
-                            .equals(varSymbol.getType().getName())) {
-                        System.err.println("Error in line: "+expr.getLine()+ " Type of first var doesn't equal type of second var");
-                    }
-                }
-            }
-        }
-        if (expr.getLiteralValue() != null) {
-            printLiteralValue(expr.getLiteralValue());
-
-            if(varSymbol != null) {
-                if (varSymbol.getType() != null) {
-                    if (!varSymbol.getType().getName()
-                            .equals(varType)) {
-                        System.err.println("Error in line: "+expr.getLine()+ " Type of first var doesn't equal type of second var");
-                    }
-                }
-            }
-        }
-
-        if (expr.getSelectStmt() != null) {
-            printSelectStmt(expr.getSelectStmt());
-        }
-        if (expr.getSql_stmt_list() != null) {
-            for (int i = 0; i < expr.getSql_stmt_list().size(); i++) {
-                visit(expr.getSql_stmt_list().get(i));
-            }
-        }
-        if (expr.getExprs() != null) {
-            for (int i = 0; i < expr.getExprs().size(); i++) {
-                printExprVar(expr.getExprs().get(i),varSymbol);
-            }
-        }
-    }
-
-    List<String> list = new ArrayList<>();
-    List<String> listKey = new ArrayList<>();
-    private void printExpr(Expr expr) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast expr");
-        if (expr == null) {
-            return;
-        }
-
-
-        if (expr.getSql_stmt_list() != null) {
-            for (int i = 0; i < expr.getSql_stmt_list().size(); i++) {
-                visit(expr.getSql_stmt_list().get(i));
-            }
-        }
-        if(expr.getDatabaseName() != null){
-//            System.out.println("DatabaseName : "+expr.getDatabaseName());
-        }
-        if(expr.getTableName() != null){
-//            System.out.println("TableName : "+expr.getTableName());
-//            tableName = expr.getTableName();
-            checkIfTableExists(expr.getTableName(),expr.getLine(),expr.getCol());
-        }
-
-        if(expr.getFunctionName() != null){
-
-            if (GroupBy) {
-
-                FunctionCount++;
-            }
-        }
-
-        if (expr.getColumnName() != null) {
-
-            if (WhereIN ) {
-//            System.out.println(tableName+expr.getColumnName());
-                for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
-                    String name = Main.symbolTable.getDeclaredTypes().get(i).getName();
-                    Main.symbolTable.getDeclaredTypes().get(i).getColumns().forEach((key, value) -> {
-                        if (key.equals(expr.getColumnName()) && name.equals(tableName) ) {
-                            list.add(value.getName());
-                            listKey.add(key);
-                        }
-
-                    });
-
-                }
-
-                if (list.size() == 2) {
-                    if (!list.get(0).equals(list.get(1))){
-                        System.err.println("Error in line "+expr.getLine()+" Also "+listKey.get(0)+" and "+listKey.get(1)+" should be from the same type");
-                    }
-                }
-
-
-            }
-
-
-        }
-
-        if (expr.getLiteralValue() != null  ) {
-
-            if(HavingName){
-
-                LiteralValueName = true;
-            }
-
-            printLiteralValue(expr.getLiteralValue());
-
-
-        }
-        if(expr.getK_IN() != null){
-            WhereIN = true;
-        }
-
-        if (expr.getUnaryOperator() != null ) {
-            printUnaryOperator(expr.getUnaryOperator());
-        }
-        if (expr.getOperation() != null) {
-//            for (int i = 0; i < expr.getOperation().size(); i++) {
-////                System.out.println("Operation : " +expr.getOperation().get(i));
-//            }
-        }
-        if (expr.getSelectStmt() != null) {
-            printSelectStmt(expr.getSelectStmt());
-        }
-        if (expr.getExprs() != null ) {
-            for (int i = 0; i < expr.getExprs().size(); i++) {
-                printExpr(expr.getExprs().get(i));
-            }
-        }
-
-        if ( expr.getColumnName() !=null && tableName != null) {
-
-            if(Main.symbolTable.getDeclaredTypes().size() > 0){
-                for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
-                    if (Main.symbolTable.getDeclaredTypes().get(i).getName().equals(tableName)) {
-                        checkColInTable(expr.getColumnName() , tableName ,expr.getLine());//////////// test
-                    }
-                }
-            }
-        }
-
-
-    }
-
-    private ScopeChecker printExprInlineCond(Expr expr, ScopeChecker scopeChecker, List<Symbol> symbols) {
-        if (expr == null) {
-            return scopeChecker;
-        }
-
-        if (expr.getExprs() != null) {
-            if (expr.getExprs().size() > 0) {
-                for (int i = 0; i < expr.getExprs().size(); i++) {
-                    scopeChecker = printExprInlineCond(expr.getExprs().get(i), scopeChecker,symbols);
-                }
-            }
-        }
-
-        if (expr.getColumnName() != null) {
-            if (currentScope != null) {
-                AnyName anyName = new AnyName();
-                anyName.setIDENTIFIER(expr.getColumnName());
-                scopeChecker = getAllParentScopes(currentScope, anyName,new ScopeChecker());
-                if (!scopeChecker.isFound()) {
-                    System.err.println("Error in line:"+expr.getLine()+" "+anyName.getIDENTIFIER() + " is not found");
-                }
-
-                if (scopeChecker.isFound()){
-                    symbols.add(scopeChecker.getSymbol());
-                }
-
-                if (scopeChecker.isFound() && !scopeChecker.isAssigned()){
-                    System.err.println("Warning in line:"+expr.getLine()+" "+anyName.getIDENTIFIER() + " is never assigned");
-                }
-            }
-        }
-        if (expr.getLiteralValue() != null) {
-            printLiteralValue(expr.getLiteralValue(),symbols);
-        }
-
-        if (expr.getSelectStmt() != null) {
-            printSelectStmt(expr.getSelectStmt());
-        }
-
-        return scopeChecker;
-    }
-
-    private void printExpr(Expr_Print expr) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast expr");
-        if (expr == null) {
-            return;
-        }
-
-        if (expr.getDatabaseName() != null) {
-//            System.out.println("DatabaseName : "+expr.getDatabaseName());
-        }
-        if (expr.getTableName() != null) {
-//            System.out.println("TableName : "+expr.getTableName());
-        }
-        if (expr.getFunctionName() != null) {
-//            System.out.println("FunctionName : "+expr.getFunctionName());
-        }
-
-        if (expr.getColumnName() != null) {
-//            System.out.println("Expr : "+expr.getColumnName());
-            return;
-        }
-        if (expr.getLiteralValue() != null) {
-            printLiteralValue(expr.getLiteralValue());
-        }
-        if (expr.getUnaryOperator() != null) {
-            printUnaryOperator(expr.getUnaryOperator());
-        }
-        if (expr.getOperation() != null) {
-            for (int i = 0; i < expr.getOperation().size(); i++) {
-//                System.out.println("Operation : " +expr.getOperation().get(i));
-            }
-        }
-        if (expr.getSelectStmt() != null) {
-            printSelectStmt(expr.getSelectStmt());
-        }
-    }
-
-    private void printExprForAndOperator(Expr_for_and_operator expr, boolean isKeyVarExist) {
-        if (expr == null) {
-            return;
-        }
-
-        if (expr.getLiteralValue() != null) {
-            printLiteralValue(expr.getLiteralValue());
-        }
-
-        if (expr.getExpr_for_and_operator() != null) {
-            printExprForAndOperator(expr.getExpr_for_and_operator(),isKeyVarExist);
-        }
-
-        if (expr.getAnyName() != null) {
-            List<Symbol> symbols = new ArrayList<>();
-            printAnyNameExprIfAndJavaOther(expr.getAnyName(),true,symbols, expr.getLine());
-        }
-
-        if (expr.getExprVarInit() != null){
-            printExprForVarInit(expr.getExprVarInit(),isKeyVarExist);
-        }
-    }
-
-    private void printExprForVarInit(ExprVarInit exprVarInit, boolean isKeyVarExist) {
-        Symbol varSymbol = new Symbol();
-
-        if (exprVarInit.getCurrentScope() != null) {
-            currentScope = exprVarInit.getCurrentScope();
-        }
-
-        if (!isKeyVarExist) {
-            if (exprVarInit.getAnyName() != null) {
-                List<Symbol> symbols = new ArrayList<>();
-                ScopeChecker scopeChecker = printAnyNameExprIfAndJavaOther(exprVarInit.getAnyName(), true,symbols,exprVarInit.getLine());
-                varSymbol = scopeChecker.getSymbol();
-            }
-
-            if (exprVarInit.getExpr() != null) {
-                printExprVar(exprVarInit.getExpr(), varSymbol);
-            }
-        }
-    }
-
-
-    private ScopeChecker printExprIf(Expr_if expr, boolean isInsideForStmt, ScopeChecker scopeChecker,List<Symbol> symbols) {
-        if (expr == null) {
-            return new ScopeChecker();
-        }
-
-        if (expr.getLiteralValue() != null) {
-            printLiteralValue(expr.getLiteralValue(),symbols);
-        }
-
-        if (expr.getOperation() != null) {
-            for (int i = 0; i < expr.getOperation().size(); i++) {
-            }
-        }
-
-        if (expr.getExpr_ifs() != null){
-            for (int i = 0; i < expr.getExpr_ifs().size(); i++) {
-                scopeChecker = printExprIf(expr.getExpr_ifs().get(i),isInsideForStmt,scopeChecker,symbols);
-            }
-        }
-
-        if (expr.getAnyNames() != null) {
-            for (int i = 0; i < expr.getAnyNames().size(); i++) {
-                if (isInsideForStmt)
-                    scopeChecker = printAnyNameExprIfAndJavaOther(expr.getAnyNames().get(i),true,symbols,expr.getLine());
-                else
-                    scopeChecker = printAnyNameExprIfAndJavaOther(expr.getAnyNames().get(i),false,symbols,expr.getLine());
-            }
-        }
-        return scopeChecker;
-    }
-
-    private ScopeChecker printExprWhile(Expr_while expr, ScopeChecker scopeChecker,List<Symbol> symbols ) {
-        if (expr == null) {
-            return new ScopeChecker();
-        }
-
-        if (expr.getLiteralValue() != null) {
-            printLiteralValue(expr.getLiteralValue(),symbols);
-        }
-
-        if (expr.getExpr_while() != null) {
-            for (int i = 0; i < expr.getExpr_while().size(); i++) {
-                scopeChecker = printExprWhile(expr.getExpr_while().get(i),scopeChecker,symbols);
-            }
-        }
-
-        if (expr.getAnyNamesList() != null) {
-            for (int i = 0; i < expr.getAnyNamesList().size(); i++) {
-                scopeChecker = printAnyNameExprIfAndJavaOther(expr.getAnyNamesList().get(i),false,symbols,expr.getLine());
-            }
-        }
-
-        return scopeChecker;
-    }
-
-    private void printUnaryOperator(UnaryOperator unaryOperator) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast unaryOperator");
-        if (unaryOperator.getNot() != null) {
-//            System.out.println("Operator : "+ unaryOperator.getNot());
-        }
-        if (unaryOperator.getMinus() != null) {
-//            System.out.println("Operator : "+ unaryOperator.getMinus());
-        }
-        if (unaryOperator.getPlus() != null) {
-//            System.out.println("Operator : "+ unaryOperator.getPlus());
-        }
-        if (unaryOperator.getTilde() != null) {
-//            System.out.println("Operator : "+ unaryOperator.getTilde());
-        }
-    }
-
-    private void printLiteralValue(LiteralValue literalValue, List<Symbol> symbols) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast literalValue");
-        if (literalValue.getCurrentTimeStamp() != null) {
-//            System.out.println(literalValue.getCurrentTimeStamp());
-        }
-        if (literalValue.getCurrentTime() != null) {
-//            System.out.println(literalValue.getCurrentTime() );
-        }
-        if (literalValue.getNullValue() != null) {
-//            System.out.println(literalValue.getNullValue() );
-        }
-        if (literalValue.getBlobValue() != null) {
-//            System.out.println(literalValue.getBlobValue() );
-        }
-        Symbol s = new Symbol();
-        if (literalValue.getNumericalValue() != null) {
-            varType = Type.NUMBER_CONST; // this for for_stmt
-            Type type = new Type();
-            type.setName(varType);
-            s.setType(type);
-            s.setName("literal number");
-            symbols.add(s);
-        }
-        if (literalValue.getStringValue() != null) {
-            varType = Type.STRING_CONST; // this for for_stmt
-            Type type = new Type();
-            type.setName(varType);
-            s.setType(type);
-            s.setName("literal string");
-            symbols.add(s);
-        }
-    }
-
-    private void printLiteralValue(LiteralValue literalValue) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast literalValue");
-        if (literalValue.getCurrentTimeStamp() != null) {
-//            System.out.println(literalValue.getCurrentTimeStamp());
-        }
-        if (literalValue.getCurrentTime() != null) {
-//            System.out.println(literalValue.getCurrentTime() );
-        }
-        if (literalValue.getNullValue() != null) {
-//            System.out.println(literalValue.getNullValue() );
-        }
-        if (literalValue.getBlobValue() != null) {
-//            System.out.println(literalValue.getBlobValue() );
-        }
-        if (literalValue.getNumericalValue() != null) {
-            varType = Type.NUMBER_CONST; // this for for_stmt
-        }
-        if (literalValue.getStringValue() != null) {
-            varType = Type.STRING_CONST; // this for for_stmt
-        }
-    }
-
-    private void printSelectOrValues(SelectOrValues selectOrValues) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast selectOrValues");
-        if (selectOrValues.getResultColumns() != null) {
-            for (int i = 0; i < selectOrValues.getResultColumns().size(); i++) {
-                printResultColumns(selectOrValues.getResultColumns().get(i));
-
-            }
-        }
-        if (selectOrValues.getFrom() != null) {
-//            System.out.println(selectOrValues.getFrom());
-        }
-        if (selectOrValues.getJoinClause() != null) {
-            printJoinClause(selectOrValues.getJoinClause());
-        }
-        if (selectOrValues.getTableOrSubQueries() != null) {
-            for (int i = 0; i < selectOrValues.getTableOrSubQueries().size(); i++) {
-                printTableOrSubQueries(selectOrValues.getTableOrSubQueries().get(i));
-            }
-        }
-        if (selectOrValues.getExpr() != null) {
-            for (int i = 0; i < selectOrValues.getExpr().size(); i++) {
-                printExpr(selectOrValues.getExpr().get(i));
-            }
-        }
-
-    }
-
-    private void printTableOrSubQueries(TableOrSubQuery tableOrSubQuery) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast tableOrSubQuery");
-        if (tableOrSubQuery == null) {
-            return;
-        }
-        if (tableOrSubQuery.getDataBaseName() != null) {
-//            System.out.println(tableOrSubQuery.getDataBaseName());
-        }
-        if (tableOrSubQuery.getTableName() != null) {
-//            System.out.println("TableName : "+tableOrSubQuery.getTableName());
-            tableName = tableOrSubQuery.getTableName();
-
-            checkIfTableExists(tableOrSubQuery.getTableName() ,tableOrSubQuery.getLine() , tableOrSubQuery.getCol());
-        }
-        if (tableOrSubQuery.getIndexName() != null) {
-//            System.out.println("IndexName : "+tableOrSubQuery.getIndexName());
-        }
-        if (tableOrSubQuery.getResultColumn() != null) {
-            printResultColumns(tableOrSubQuery.getResultColumn());
-        }
-        if (tableOrSubQuery.getJoinClause() != null) {
-            printJoinClause(tableOrSubQuery.getJoinClause());
-        }
-        if (tableOrSubQuery.getSelectOrValues() != null) {
-            printSelectOrValues(tableOrSubQuery.getSelectOrValues());
-        }
-        if (tableOrSubQuery.getTableOrSubQueries() != null) {
-            for (int i = 0; i < tableOrSubQuery.getTableOrSubQueries().size(); i++) {
-                printTableOrSubQueries(tableOrSubQuery.getTableOrSubQueries().get(i));
-            }
-        }
-        if (tableOrSubQuery.getTableAlias() != null) {
-//            System.out.println(tableOrSubQuery.getTableAlias());
-        }
-    }
-
-    private void checkIfTableExists(String table , int line , int col){
-        AtomicBoolean checkTable = new AtomicBoolean(false);
-        for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
-            String name = Main.symbolTable.getDeclaredTypes().get(i).getName();
-            if ( name.equals(table)) {
-                checkTable.set(true);
-            }
-
-        }
-        if(!checkTable.get()){
-            System.err.println("Error in line:"+line +" col:"+col +" "+table+ " not found "  );
-        }
-    }
-
-    private void printJoinClause(JoinClause joinClause) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast joinClause");
-        if (joinClause.getJoinOperator() != null) {
-            for (int i = 0; i < joinClause.getJoinOperator().size(); i++) {
-                printJoinOperator(joinClause.getJoinOperator().get(i));
-            }
-        }
-        if (joinClause.getTableOrSubQuery() != null) {
-            for (int i = 0; i < joinClause.getTableOrSubQuery().size(); i++) {
-                printTableOrSubQueries(joinClause.getTableOrSubQuery().get(i));
-            }
-        }
-
-        if (joinClause.getJoinConstraint() != null) {
-            for (int i = 0; i < joinClause.getJoinConstraint().size(); i++) {
-                printJoinConstraint(joinClause.getJoinConstraint().get(i));
-            }
-        }
-
-    }
-
-    private void printJoinOperator(JoinOperator joinOperator) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast joinOperator");
-//        if (joinOperator.getJoin() != null) {
-////            System.out.println(joinOperator.getJoin());
-//        }
-        if (joinOperator.getInner() != null) {
-//            System.out.println(joinOperator.getInner() );
-        }
-        if (joinOperator.getOuter() != null) {
-//            System.out.println(joinOperator.getOuter());
-        }
-
-        if (joinOperator.getLeft() != null) {
-//            System.out.println(joinOperator.getLeft());
-        }
-    }
-
-    private void printJoinConstraint(JoinConstraint joinConstraint) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast joinConstraint");
-        if (joinConstraint.getName() != null) {
-//            System.out.println(joinConstraint.getName());
-        }else{
-            System.err.println("Error join doesn’t have ON statement with it");
-        }
-        if (joinConstraint.getExpr() != null) {
-            printExpr(joinConstraint.getExpr());
-        }
-    }
-
-    private void printResultColumns(ResultColumn resultColumn) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast resultColumn");
-        if (resultColumn.getTableName() != null) {
-//            System.out.println("TableName"+resultColumn.getTableName());
-//            tableName = resultColumn.getTableName(); /////////////////////////////////////////////////////////////
-        }
-        if (resultColumn.getColumnAlias() != null) {
-//            System.out.println("ColumnAlias : "+resultColumn.getColumnAlias());
-        }
-        if (resultColumn.getStar() != null) {
-//            System.out.println(resultColumn.getStar());
-            if(WhereIN){
-                System.err.println("Error IN Clause if return more than one column");
-            }
-//            ResultColumn = true;
-        }
-        if (resultColumn.getExpr() != null) {
-//                printExprResultColumn(resultColumn.getExpr());
-            printExpr(resultColumn.getExpr());
-        }
-
-
-    }
-
-    private void printExprResultColumn(Expr expr) {
-        if (expr.getColumnName() != null) {
-            AtomicBoolean check = new AtomicBoolean(false);
-            AtomicBoolean checkTable = new AtomicBoolean(false);
-//            System.out.println("Expr : "+expr.getColumnName());
-//            System.out.println("table NAME : "+tableName);
-            for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
-                String name = Main.symbolTable.getDeclaredTypes().get(i).getName();
-                Main.symbolTable.getDeclaredTypes().get(i).getColumns().forEach((key, value) -> {
-
-                    if ( name.equals(tableName)) {
-                        checkTable.set(true);
-                        if(expr.getColumnName().equals(key)){
-                            check.set(true);
-                        }
-                    }
-
-                });
-
-            }
-            if(tableName != null){
-                if(!checkTable.get()){
-//                   System.err.println(tableName+ " not found "  );
-                }else {
-                    if (!check.get()) {
-                        System.err.println("Error In Line :" + expr.getLine() +" "+expr.getColumnName() + " undefined Column in " + tableName );
-
-                    }
-                }
-            }
-
-
-        }
-    }
-
-    private void checkColInTable( String columnName ,String table , int Line ){
-        AtomicBoolean check = new AtomicBoolean(false);
-        AtomicBoolean checkTable = new AtomicBoolean(false);
-//            System.out.println("Expr : "+expr.getColumnName());
-//            System.out.println("table NAME : "+tableName);
-        for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
-            String name = Main.symbolTable.getDeclaredTypes().get(i).getName();
-            Main.symbolTable.getDeclaredTypes().get(i).getColumns().forEach((key, value) -> {
-
-                if ( name.equals(table)) {
-                    checkTable.set(true);
-                    if(columnName.equals(key)){
-                        check.set(true);
-                    }
-                }
-
-            });
-
-        }
-        if(table != null){
-            if(!checkTable.get()){
-                System.err.println("Error in line "+Line +" "+table+ " not found "  );
-            }else {
-                if (!check.get()) {
-                    System.err.println( "Error in line "+Line +" "+columnName + " undefined Column in " + table );
-
-                }
-            }
-        }
-    }
-
-    private void printOrderingTerm(OrderingTerm orderingTerm) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast orderingTerm");
-        if (orderingTerm.getExpr() != null) {
-            printExpr(orderingTerm.getExpr());
-        }
-        if (orderingTerm.getASC() != null) {
-//            System.out.println(orderingTerm.getASC());
-        }
-        if (orderingTerm.getDESC() != null) {
-//            System.out.println(orderingTerm.getDESC());
-        }
-    }
-
-    private void printColumnDefList(ColumnDef columnDef) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast columnDef");
-
-        if (columnDef.getColumnName() != null) {
-//            System.out.println("ColumnName : "+columnDef.getColumnName());
-        }
-        if (columnDef.getTypeName() != null) {
-            for (int i = 0; i < columnDef.getTypeName().size(); i++) {
-                printTypeName(columnDef.getTypeName().get(i));
-            }
-        }
-        if (columnDef.getColumnConstraint() != null) {
-            for (int i = 0; i < columnDef.getColumnConstraint().size(); i++) {
-                printColumnConstraint(columnDef.getColumnConstraint().get(i));
-            }
-        }
-
-
-    }
-
-    private void printTypeName(TypeName typeName) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast typeName");
-        if (typeName.getAnyNames() != null) {
-            for (int i = 0; i < typeName.getAnyNames().size(); i++) {
-                printAnyName(typeName.getAnyNames().get(i));
-
-            }
-        }
-        if (typeName.getName() != null) {
-            boolean check = false;
-//            System.out.println("typeName : " +typeName.getName());
-            for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
-//            System.out.println("Parent Type Name " + Main.symbolTable.getDeclaredTypes().get(i).getName());
-                if(typeName.getName().equals(Main.symbolTable.getDeclaredTypes().get(i).getName())){
-                    check = true;
-                }
-                if(typeName.getName().equals(Type.NUMBER_CONST)){
-                    check = true;
-                }
-                if(typeName.getName().equals(Type.STRING_CONST)){
-                    check = true;
-                }
-                if(typeName.getName().equals(Type.BOOLEAN_CONST)){
-                    check = true;
-                }
-            }
-            if (!check) {
-                System.err.println("Error in line: " + typeName.getLine()+" type " + typeName.getName() +" not Found");
-
-            }
-        }
-        if (typeName.getSignedNumbers() != null) {
-            for (int i = 0; i < typeName.getSignedNumbers().size(); i++) {
-                printSignedNumbers(typeName.getSignedNumbers().get(i));
-            }
-        }
-
-    }
-
-    private void printSignedNumbers(SignedNumber signedNumber) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast signedNumber");
-        if (signedNumber.getStar() != null) {
-//            System.out.println(signedNumber.getStar());
-        }
-        if (signedNumber.getMinus() != null) {
-//            System.out.println(signedNumber.getMinus());
-        }
-        if (signedNumber.getNumericLiteral() != null) {
-//            System.out.println(signedNumber.getNumericLiteral());
-        }
-        if (signedNumber.getPlus() != null) {
-//            System.out.println(signedNumber.getPlus());
-        }
-
-
-    }
-
-    public static String typeName;
-    private void printAnyName(AnyName anyName) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast anyName");
-        if (anyName == null) {
-            return;
-        }
-        if (anyName.getAnyName() != null) {
-            printAnyName(anyName.getAnyName());
-        }
-        if (anyName.getIDENTIFIER() != null) {
-//            System.out.println(anyName.getIDENTIFIER());
-            typeName = anyName.getIDENTIFIER();
-
-            if (anyName.getStrinagLiteral() != null) {
-//                System.out.println(anyName.getStrinagLiteral());
-            }
-            if (anyName.getKeyword() != null) {
-//                System.out.println(anyName.getKeyword());
-            }
-        }
-    }
-
-
-    private ScopeChecker printAnyNameExprIfAndJavaOther(AnyName anyName, boolean isForOrVar, List<Symbol> symbols ,int line ) {
-
-        if (anyName == null) {
-            return new ScopeChecker();
-        }
-        ScopeChecker scopeChecker = new ScopeChecker();
-        if (anyName.getAnyName() != null) {
-            printAnyNameExprIfAndJavaOther(anyName.getAnyName(),isForOrVar,symbols,line);
-        }
-        if (anyName.getIDENTIFIER() != null) {
-            varName = anyName.getIDENTIFIER();
-
-            if (currentScope != null) {
-                scopeChecker = getAllParentScopes(currentScope, anyName,new ScopeChecker());
-                if (!scopeChecker.isFound()) {
-                    System.err.println("Error in line: " +line+" "+anyName.getIDENTIFIER() + " is not found");
-                }
-
-                if (scopeChecker.isFound()){
-                    symbols.add(scopeChecker.getSymbol());
-                }
-
-                if (!isForOrVar) {
-                    if (scopeChecker.isFound() && !scopeChecker.isAssigned()) {
-                        System.err.println("Warning in line: " +line+" "+anyName.getIDENTIFIER() + " is never assigned");
-                    }
-                }
-            }
-        }
-
-        if (anyName.getStrinagLiteral() != null) {
-//            System.out.println(anyName.getStrinagLiteral());
-        }
-        if (anyName.getKeyword() != null) {
-//            System.out.println(anyName.getKeyword());
-        }
-
-        return scopeChecker;
-    }
-
-    private ScopeChecker getAllParentScopes(Scope scope, AnyName anyName, ScopeChecker scopeChecker) {
-        if (scope.getParent() != null) {
-
-            for (Symbol symbol : scope.getParent().getSymbols()) {
-                if (symbol.getName().equals(anyName.getIDENTIFIER()) && symbol.isHasKeyVar()) {
-                    scopeChecker.setFound(true);
-                    scopeChecker.setAssigned(symbol.isAssigned());
-                    scopeChecker.setSymbol(symbol);
-                    break;
-                }
-            }
-            if (!scopeChecker.isFound()) {
-                scopeChecker = getAllParentScopes(scope.getParent(), anyName,scopeChecker);
-            }
-        }
-
-        return scopeChecker;
-    }
-
-    private void printColumnConstraint(ColumnConstraint columnConstraint) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast columnConstraint");
-        if (columnConstraint.getColumnForeignKey() != null) {
-            printColumnForeignKey(columnConstraint.getColumnForeignKey());
-        }
-        if (columnConstraint.getColumnNotNull() != null) {
-            if (columnConstraint.getColumnNotNull().getNot() != null) {
-//            System.out.println(columnConstraint.getColumnNotNull().getNot());
-            }
-            if (columnConstraint.getColumnNotNull().getNull() != null) {
-//                System.out.println(columnConstraint.getColumnNotNull().getNull());
-            }
-        }
-        if (columnConstraint.getColumnNull() != null) {
-//            System.out.println(columnConstraint.getColumnNull().getNull());
-        }
-        if (columnConstraint.getColumnPrimaryKey() != null) {
-            printColumnPrimaryKey(columnConstraint.getColumnPrimaryKey());
-        }
-    }
-
-    private void printColumnPrimaryKey(ColumnPrimaryKey columnPrimaryKey) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast columnPrimaryKey");
-        if (columnPrimaryKey.getPRIMARY() != null) {
-//            System.out.println(columnPrimaryKey.getPRIMARY());
-        }
-        if (columnPrimaryKey.getKEY() != null) {
-//            System.out.println(columnPrimaryKey.getKEY());
-        }
-        if (columnPrimaryKey.getASC() != null) {
-//            System.out.println(columnPrimaryKey.getASC());
-        }
-        if (columnPrimaryKey.getDESC() != null) {
-//            System.out.println(columnPrimaryKey.getDESC());
-        }
-        if (columnPrimaryKey.getAUTOINCREMENT() != null) {
-//            System.out.println(columnPrimaryKey.getAUTOINCREMENT());
-        }
-
-    }
-
-    private void printColumnForeignKey(ColumnForeignKey columnForeignKey) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("columnForeignKey");
-        if (columnForeignKey.getForeignKeyClause() != null) {
-            printForeignKeyClause(columnForeignKey.getForeignKeyClause());
-        }
-    }
-
-    private void printForeignKeyClause(ForeignKeyClause foreignKeyClause) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast foreignKeyClause");
-        if (foreignKeyClause.getDatabaseName() != null) {
-//            System.out.println(foreignKeyClause.getDatabaseName());
-        }
-        if (foreignKeyClause.getFkTargetColumnName() != null) {
-            for (int i = 0; i < foreignKeyClause.getFkTargetColumnName().size(); i++) {
-//                System.out.println(foreignKeyClause.getFkTargetColumnName().get(i));
-            }
-        }
-        if (foreignKeyClause.getForeignTable() != null) {
-//            System.out.println(foreignKeyClause.getForeignTable());
-        }
-
-    }
-
-    private void printTableConstraints(TableConstraint tableConstraint) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast tableConstraint");
-        if (tableConstraint.getName() != null) {
-//            System.out.println(tableConstraint.getName());
-        }
-        if (tableConstraint.getForeignKeys() != null) {
-            printForeignkeys(tableConstraint.getForeignKeys());
-        }
-        if (tableConstraint.getTableConstraintKey() != null) {
-            printTableConstraintKey(tableConstraint.getTableConstraintKey());
-        }
-        if (tableConstraint.getTableConstraintPrimaryKey() != null) {
-            printTableConstraintPrimaryKey(tableConstraint.getTableConstraintPrimaryKey());
-        }
-        if (tableConstraint.getTableConstraintUnique() != null) {
-            printTableConstraintUnique(tableConstraint.getTableConstraintUnique());
-        }
-        if (tableConstraint.getCheckExpr() != null) {
-//            System.out.println( tableConstraint.getCheckExpr());
-        }
-        if (tableConstraint.getExpr() != null) {
-            printExpr(tableConstraint.getExpr());
-        }
-        if (tableConstraint.getConstraint() != null) {
-//            System.out.println(tableConstraint.getConstraint());
-        }
-    }
-
-    private void printTableConstraintUnique(TableConstraintUnique tableConstraintUnique) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast tableConstraintUnique");
-        if (tableConstraintUnique.getUNIQUE() != null) {
-//            System.out.println(tableConstraintUnique.getUNIQUE());
-        }
-        if (tableConstraintUnique.getKEY() != null) {
-//            System.out.println(tableConstraintUnique.getKEY());
-        }
-        if (tableConstraintUnique.getIndexedColumn() != null) {
-            for (int i = 0; i < tableConstraintUnique.getIndexedColumn().size(); i++) {
-                printIndexedColumn(tableConstraintUnique.getIndexedColumn().get(i));
-            }
-        }
-        if (tableConstraintUnique.getName() != null) {
-//            System.out.println(tableConstraintUnique.getName());
-        }
-    }
-
-    private void printTableConstraintPrimaryKey(PrimaryKey tableConstraintPrimaryKey) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast tableConstraintPrimaryKey");
-        if (tableConstraintPrimaryKey.getName() != null) {
-//            System.out.println(tableConstraintPrimaryKey.getName());
-        }
-        if (tableConstraintPrimaryKey.getIndexedColumn() != null) {
-            for (int i = 0; i < tableConstraintPrimaryKey.getIndexedColumn().size(); i++) {
-                printIndexedColumn(tableConstraintPrimaryKey.getIndexedColumn().get(i));
-            }
-        }
-
-
-    }
-
-    private void printIndexedColumn(IndexedColumn indexedColumn) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast indexedColumn");
-        if (indexedColumn.getColumnName() != null) {
-//            System.out.println("ColumnName : "+indexedColumn.getColumnName());
-        }
-        if (indexedColumn.getASC() != null) {
-//            System.out.println(indexedColumn.getASC());
-        }
-        if (indexedColumn.getDESC() != null) {
-//            System.out.println(indexedColumn.getDESC());
-        }
-        if (indexedColumn.getCOLLATE() != null) {
-//            System.out.println(indexedColumn.getCOLLATE());
-        }
-        if (indexedColumn.getCollationName() != null) {
-//            System.out.println("CollationName : "+indexedColumn.getCollationName());
-        }
-
-    }
-
-    private void printTableConstraintKey(TableConstraintKey tableConstraintKey) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast tableConstraintKey");
-        if (tableConstraintKey.getName() != null) {
-//            System.out.println(tableConstraintKey.getName());
-        }
-    }
-
-    private void printForeignkeys(ForeignKey foreignKeys) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast foreignKeys");
-        if (foreignKeys.getForeignKeyClause() != null) {
-            printForeignKeyClause(foreignKeys.getForeignKeyClause());
-        }
-    }
-
-    private void printSelectStmt(SelectStmt selectStmt) {
-//        System.out.println("--------------------------------------");
-//        System.out.println("ast selectStmt");
-        if (selectStmt.getExpr() != null) {
-            for (int i = 0; i < selectStmt.getExpr().size(); i++) {
-                printExpr(selectStmt.getExpr().get(i));
-            }
-        }
-        if (selectStmt.getFromItem() != null) {
-//            System.out.println("FromItem : "+selectStmt.getFromItem());
-        }
-        if (selectStmt.getSelectOrValues() != null) {
-            printSelectOrValues(selectStmt.getSelectOrValues());
-        }
-        if (selectStmt.getOrderingTerm() != null) {
-            for (int i = 0; i < selectStmt.getOrderingTerm().size(); i++) {
-//                System.out.println(selectStmt.getOrderingTerm().get(i));
-            }
-        }
     }
 
 }

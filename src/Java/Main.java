@@ -1,6 +1,8 @@
 package Java;
 
+import CodeGeneration.SelectQuery;
 import Java.AST.Parse;
+import Java.AST.QueryStmt.SelectStmt.SelectCore;
 import Java.AST.Visitor.BaseASTVisitor;
 import Java.Base.BaseVisitor;
 import Java.SymbolTable.Type;
@@ -21,6 +23,7 @@ import static org.antlr.v4.runtime.CharStreams.fromFileName;
 public class Main {
     public static SymbolTable symbolTable = new SymbolTable();
     public static  Type rightType = new Type();
+    public static SelectCore selectCore= new SelectCore();
     public static void main(String[] args) {
         try {
             String source = "samples//samples.txt";
