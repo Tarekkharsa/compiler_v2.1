@@ -2,6 +2,6 @@ create type Address (id number, name string);
 create table users (id number, name string ) type =csv , path= 'C:\Users\Bcc\Desktop\Code Generation\users.csv';
 
 Func(){
-    var z = select name,Count(id) from users;
+
     var x = select name from users;
 }

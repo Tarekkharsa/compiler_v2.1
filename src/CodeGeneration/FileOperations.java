@@ -180,4 +180,51 @@ public class FileOperations {
             e.printStackTrace();
         }
     }
+
+    public void writeMainFile(File file) {
+        try (PrintWriter pr = new PrintWriter(file)) {
+
+            pr.append("public class Main {\n" +
+                    "    public static void main(String[] args) {\n");
+            pr.append("\t\tCG();\n");
+            pr.append("\t}\n");
+
+            // Code Generation function
+            pr.append("\tpublic static void CG(){\n");
+            for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
+                if(Main.symbolTable.getDeclaredTypes().get(i).getPath() != null ){
+                    String  object = Main.symbolTable.getDeclaredTypes().get(i).getName().substring(0, Main.symbolTable.getDeclaredTypes().get(i).getName().length() - 1);
+                    pr.append("\t\t"+ Main.symbolTable.getDeclaredTypes().get(i).getName()+" "+ object + " = new "+Main.symbolTable.getDeclaredTypes().get(i).getName()+"();\n");
+                    pr.append("\t\t"+object+"."+"load();\n");
+                    pr.append("\t\t System.out.println(user.data.size());\n");
+                }
+            }
+
+            for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
+                if(Main.symbolTable.getDeclaredTypes().get(i).getName().contains("_") ){
+            String  object = Main.symbolTable.getDeclaredTypes().get(i).getName().substring(0, Main.symbolTable.getDeclaredTypes().get(i).getName().length() - 1);
+                    pr.append("\t\t"+ Main.symbolTable.getDeclaredTypes().get(i).getName()+" "+ object + " = new "+Main.symbolTable.getDeclaredTypes().get(i).getName()+"();\n");
+
+
+                }
+            }
+
+
+            pr.append("\t}\n");
+
+
+
+
+
+
+            pr.append("}\n");
+
+            pr.flush();
+
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+    }
 }

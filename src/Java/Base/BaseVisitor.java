@@ -2371,7 +2371,6 @@ public class BaseVisitor extends SQLBaseVisitor {
     @Override
     public VarInit visitVar_init(SQLParser.Var_initContext ctx) {
         VarInit varInit = new VarInit();
-
         // symbol table
         Symbol varSymbol = new Symbol();
         String varName = "";
@@ -2452,7 +2451,7 @@ public class BaseVisitor extends SQLBaseVisitor {
 
                 type.setName(typeName);
             }
-            Main.symbolTable.getDeclaredTypes().add(type);
+
 
             if (expr.getFunctionName() != null){
                 String typeName = "function";
@@ -2462,6 +2461,7 @@ public class BaseVisitor extends SQLBaseVisitor {
             // if assign to another var
             if (expr.getColumnName() != null) {
                 type = getTypeWhenAssignToAnotherVar(varSymbol, expr.getColumnName());
+
             }
 
             varSymbol.setIsParam(false);
@@ -2482,6 +2482,7 @@ public class BaseVisitor extends SQLBaseVisitor {
             expr.setCol(ctx.getStart().getCharPositionInLine()); //
         }
 
+        Main.symbolTable.getDeclaredTypes().add(type);
 
         return varInit;
     }

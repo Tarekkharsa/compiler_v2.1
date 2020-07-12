@@ -1,6 +1,5 @@
 package Java.AST.Visitor;
 
-import CodeGeneration.ExecuteQuery;
 import CodeGeneration.FileOperations;
 import Java.AST.DefAllObject;
 import Java.AST.Expr.*;
@@ -31,12 +30,12 @@ import Java.Main;
 import Java.SymbolTable.*;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static Java.Main.functionDeclaration;
 
 public class BaseASTVisitor implements ASTVisitor {
     private Scope currentScope;
@@ -82,12 +81,21 @@ public class BaseASTVisitor implements ASTVisitor {
 
             }
         }
-//        if(Main.selectCore != null){
-//            if(Main.selectCore.getTableOrSubQueries() != null){
-//
-//            }
-//
-//        }
+        if(functionDeclaration != null){
+            for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
+                File file = new File("C:\\Users\\Bcc\\Desktop\\CompilerTest\\src\\Main.java");
+
+                try {
+                    if(file.createNewFile()){
+                        operations.writeMainFile(file );
+                    }else {
+                        operations.writeMainFile(file );
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
         
         
         
@@ -1510,7 +1518,11 @@ public class BaseASTVisitor implements ASTVisitor {
 
     private void printFunctionDeclarations(FunctionDeclaration functionDeclarations) {
 //        System.out.println("--------------------------------------");
-//        System.out.println("ast functionDeclarations");
+        System.out.println("ast functionDeclarations");
+        if(functionDeclarations != null){
+            functionDeclaration = functionDeclarations;
+        }
+
 //        if (functionDeclarations.getK_var() != null) {
 ////            System.out.println(functionDeclarations.getK_var());
 //        }
