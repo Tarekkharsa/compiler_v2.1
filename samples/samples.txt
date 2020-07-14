@@ -1,7 +1,7 @@
 create type Address (id number, name string);
-create table users (id number, name string ) type =csv , path= 'C:\Users\Bcc\Desktop\Code Generation\users.csv';
+create table users (id number, name string,is_married boolean ) type =csv , path= 'C:\Users\Bcc\Desktop\Code Generation\users.csv';
 
 Func(){
 
-    var x = select name from users;
+    var x = select id from users WHERE name LIKE "%a%" AND id >= 1 AND is_married = 'true';
 }

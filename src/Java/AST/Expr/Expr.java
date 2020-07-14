@@ -11,7 +11,7 @@ import java.util.List;
 public class Expr extends Node {
     private String databaseName;
     private String tableName;
-    private String K_IN;
+    public String K_IN;
     private String columnName;
     private UnaryOperator unaryOperator;
     private LiteralValue literalValue;

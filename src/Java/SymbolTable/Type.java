@@ -9,8 +9,16 @@ public class Type {
     private String name;
     private String path;
     private String fileType;
+    private String typeNum;
     private Map<String, Type> columns = new LinkedHashMap<>();
 
+    public String getTypeCG() {
+        return typeNum;
+    }
+
+    public void setTypeNum(String typeNum) {
+        this.typeNum = typeNum;
+    }
 
     public final static String NUMBER_CONST = "number";
     public final static String STRING_CONST = "string";

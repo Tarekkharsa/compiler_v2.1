@@ -2,27 +2,22 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="57616b6f-dc0e-4c54-9253-48e762344409" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/AST_getting_started/CodeGeneration/Column.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/AST_getting_started/CodeGeneration/ExecuteQuery.class" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/AST_getting_started/CodeGeneration/FileOperations.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/AST_getting_started/CodeGeneration/FileOperations.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/AST_getting_started/CodeGeneration/FromClause.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/AST_getting_started/CodeGeneration/SelectClause.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/AST_getting_started/CodeGeneration/SelectQuery.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/AST_getting_started/Java/AST/Expr/Expr.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/AST_getting_started/Java/AST/Expr/Expr.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/AST_getting_started/Java/AST/QueryStmt/SelectStmt/SelectCore.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/AST_getting_started/Java/AST/QueryStmt/SelectStmt/SelectCore.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/AST_getting_started/Java/AST/Visitor/BaseASTVisitor.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/AST_getting_started/Java/AST/Visitor/BaseASTVisitor.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/AST_getting_started/Java/Base/BaseVisitor.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/AST_getting_started/Java/Base/BaseVisitor.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/AST_getting_started/Java/Main.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/AST_getting_started/Java/Main.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/AST_getting_started/Java/SymbolTable/Type.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/AST_getting_started/Java/SymbolTable/Type.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/samples/samples.txt" beforeDir="false" afterPath="$PROJECT_DIR$/samples/samples.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CodeGeneration/Column.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CodeGeneration/ExecuteQuery.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/CodeGeneration/FileOperations.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/CodeGeneration/FileOperations.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CodeGeneration/FromClause.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CodeGeneration/SelectClause.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CodeGeneration/SelectQuery.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Java/AST/Expr/Expr.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Java/AST/Expr/Expr.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Java/AST/QueryStmt/SelectStmt/SelectCore.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Java/AST/QueryStmt/SelectStmt/SelectCore.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Java/AST/Visitor/BaseASTVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Java/AST/Visitor/BaseASTVisitor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Java/Base/BaseVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Java/Base/BaseVisitor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Java/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Java/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Java/SymbolTable/Type.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Java/SymbolTable/Type.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -248,6 +243,11 @@
       <workItem from="1594556492911" duration="1642000" />
       <workItem from="1594567950592" duration="3164000" />
       <workItem from="1594589806861" duration="5354000" />
+      <workItem from="1594629279892" duration="9846000" />
+      <workItem from="1594655854844" duration="13826000" />
+      <workItem from="1594724561160" duration="12068000" />
+      <workItem from="1594739616636" duration="15043000" />
+      <workItem from="1594762756614" duration="286000" />
     </task>
     <servers />
   </component>

@@ -14,13 +14,15 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import Java.SymbolTable.SymbolTable;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.antlr.v4.runtime.CharStreams.fromFileName;
 
 public class Main {
     public static SymbolTable symbolTable = new SymbolTable();
     public static  Type rightType = new Type();
-    public static SelectCore selectCore= new SelectCore();
+    public static List<SelectCore> selectCores= new ArrayList<>();
     public static FunctionDeclaration functionDeclaration = new FunctionDeclaration();
     public static void main(String[] args) {
         try {

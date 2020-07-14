@@ -1,5 +1,7 @@
 package Java.Base;
 
+import CodeGeneration.Condition;
+import CodeGeneration.WhereCondition;
 import Java.AST.*;
 import Java.AST.Expr.*;
 import Java.AST.Expr.Expr_for_and_operator;
@@ -222,7 +224,9 @@ public class BaseVisitor extends SQLBaseVisitor {
     @Override
     public CreateType visitCreate_type_stmt(SQLParser.Create_type_stmtContext ctx) {
         CreateType createType = new CreateType();
+
         Type tableType = new Type();
+        tableType.setTypeNum("type");
         Main.rightType = tableType;
 
 
@@ -387,16 +391,21 @@ public class BaseVisitor extends SQLBaseVisitor {
         }
         if (ctx.column_name() != null) {
             expr.setColumnName(ctx.column_name().any_name().getText());
+            if(!ctx.column_name().any_name().getText().contains("\"")){
+//                Symbol symbol = new Symbol();
+//                symbol.setName(expr.getColumnName());
+//                symbol.setScope(Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1));
+//                Type symbolType  =new Type();
+//                symbolType.setName("columnName");
+//
+//                if(!Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1).getSymbols().contains(symbol)){
+//                    symbol.setType(symbolType);
+//                    Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1)
+//                            .setSymbol(symbol);
+//                }
+            }
 
-            Symbol symbol = new Symbol();
-            symbol.setName(ctx.column_name().any_name().getText());
-            symbol.setScope(Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1));
-            Type symbolType  =new Type();
-            symbolType.setName("columnName");
 
-            symbol.setType(symbolType);
-            Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1)
-                    .setSymbol(symbol);
         }
         if (ctx.expr() != null) {
             List<Expr> exprs = new ArrayList<>();
@@ -1089,8 +1098,21 @@ public class BaseVisitor extends SQLBaseVisitor {
 
 
         if (ctx.expr() != null) {
+            Expr expr = visitExpr(ctx.expr());
 
-            resultColumn.setExpr(visitExpr(ctx.expr()));
+            Symbol symbol = new Symbol();
+            symbol.setName(expr.getColumnName());
+            symbol.setScope(Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1));
+            Type symbolType  =new Type();
+            symbolType.setName("columnName");
+
+            symbol.setType(symbolType);
+            if(!Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1).getSymbols().contains(symbol)){
+                Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1)
+                        .setSymbol(symbol);
+            }
+
+            resultColumn.setExpr(expr);
 
         }
         if (ctx.table_name() != null) {
@@ -1128,10 +1150,16 @@ public class BaseVisitor extends SQLBaseVisitor {
             tableOrSubQuery.setDataBaseName(ctx.database_name().any_name().getText());
         }
         if (ctx.table_name() != null) {
-            symbolType.setName(ctx.table_name().getText());
+            symbolType.setName("tableName");
             tableOrSubQuery.setTableName(ctx.table_name().any_name().getText());
 
+            Symbol tableName = new Symbol();
+            tableName.setName(ctx.table_name().any_name().getText());
+            tableName.setScope(Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1));
+            tableName.setType(symbolType);
 
+            Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1)
+                    .setSymbol(tableName);
         }
         if (ctx.table_alias() != null) {
             Symbol tableAliasSymbol = new Symbol();
@@ -1526,6 +1554,7 @@ public class BaseVisitor extends SQLBaseVisitor {
     @Override
     public CreateStmt visitCreate_table_stmt(SQLParser.Create_table_stmtContext ctx) {
         Type tableType = new Type();
+        tableType.setTypeNum("table");
         Main.rightType = tableType;
         Main.rightType.setName(ctx.table_name().any_name().IDENTIFIER().getText());
 
@@ -2062,6 +2091,7 @@ public class BaseVisitor extends SQLBaseVisitor {
 
 //        System.out.println("visitSelect_core");
         SelectCore selectCore = new SelectCore();
+        Main.selectCores.add( selectCore);
 
         selectCore.setScope(selectScope);
         if (ctx.join_clause() != null) {
@@ -2120,6 +2150,14 @@ public class BaseVisitor extends SQLBaseVisitor {
                 exprs.add(visitExpr(ctx.expr(i)));
             }
             selectCore.setExprs(exprs);
+
+            if (ctx.K_WHERE() != null) {
+                if(exprs.get(0) != null){
+                selectCore.setCondition(addWhereCondition(exprs.get(0) ,selectCore));
+                }
+
+            }
+
         }
 
 
@@ -2127,6 +2165,105 @@ public class BaseVisitor extends SQLBaseVisitor {
         selectCore.setCol(ctx.getStart().getCharPositionInLine()); // get col number
 
         return selectCore;
+    }
+
+    private WhereCondition addWhereCondition(Expr expr, SelectCore selectCore) {
+        WhereCondition whereCondition = new WhereCondition();
+        if(expr.getExprs() != null){
+        whereCondition.setCondition(addCondition(expr , selectCore));
+        }
+        return whereCondition;
+    }
+
+    private Condition addCondition(Expr expr ,SelectCore selectCore) {
+
+        Condition condition  = new Condition();
+        if(expr.getExprs() != null){
+            if(!expr.getExprs().isEmpty()){
+                condition.setLeftCon(addCondition(expr.getExprs().get(0) ,selectCore));
+            }
+            if(!expr.getExprs().isEmpty()){
+                condition.setRightCon(addCondition(expr.getExprs().get(1),selectCore));
+            }
+
+            if(expr.getOperation() != null){
+                for (int i = 0; i < expr.getOperation().size(); i++) {
+                    if(expr.getOperation().get(i).equals("=")){
+                        condition.setOperator("=");
+                    }
+                    if(expr.getOperation().get(i).equalsIgnoreCase("AND")){
+                        condition.setOperator("AND");
+                    }
+                    if(expr.getOperation().get(i).equalsIgnoreCase("OR")){
+                        condition.setOperator("OR");
+                    }
+                    if(expr.getOperation().get(i).equals(">")){
+                        condition.setOperator(">");
+                    }
+                    if(expr.getOperation().get(i).equals("<")){
+                        condition.setOperator("<");
+                    }
+                    if(expr.getOperation().get(i).equals(">=")){
+                        condition.setOperator(">=");
+                    }
+                    if(expr.getOperation().get(i).equals("<=")){
+                        condition.setOperator("<=");
+                    }
+                    if(expr.getOperation().get(i).equals("<>")){
+                        condition.setOperator("<>");
+                    }
+                    if(expr.getOperation().get(i).equalsIgnoreCase("BETWEEN")){
+                        condition.setOperator("BETWEEN");
+                    }
+                    if(expr.getOperation().get(i).equalsIgnoreCase("like")){
+                        condition.setOperator("like");
+                    }
+                    if(expr.getOperation().get(i).equalsIgnoreCase("IN")){
+                        condition.setOperator("IN");
+                    }
+
+                }
+            }
+            if(expr.getColumnName() != null){
+                condition.setColumnName(expr.getColumnName());
+                Symbol symbol = new Symbol();
+                symbol.setName(expr.getColumnName());
+                symbol.setScope(Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1));
+                Type symbolType  =new Type();
+                symbolType.setName("whereColumnName");
+
+                symbol.setType(symbolType);
+                boolean s = false;
+                for (int i = 0; i < Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1).getSymbols().size(); i++) {
+                    if(Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1).getSymbols().get(i).getName().equals(symbol.getName())){
+                        s= true;
+                    }
+                }
+
+                if(!s ){
+                    if(!symbol.getName().contains("%")){
+
+                        Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 1)
+                                .setSymbol(symbol);
+                    }
+                }
+            }
+            if(expr.getTableName() != null){
+                condition.setTableName(expr.getTableName());
+            }
+            if(expr.getLiteralValue() != null){
+                condition.setLiteralValue(expr.getLiteralValue());
+            }
+            if(expr.getFunctionName() != null){
+                condition.setFunctionName(expr.getFunctionName());
+            }
+            if(expr.getSql_stmt_list() != null){
+                condition.setSub_query(true);
+                condition.setSelectCore(expr.getSql_stmt_list().get(0).getFactoredSelectStmt().getSelectCore());
+            }
+        }
+
+        return condition;
     }
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -2379,16 +2516,18 @@ public class BaseVisitor extends SQLBaseVisitor {
         // those to can handling with declared var at most once
         Scope currentScope = new Scope();
 
-        if(parentScope.getParent() != null){
-            if (!parentScope.getParent().getId().contains("select_core")){
-                parentScope = Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 2);
-            }
-        }
+
+//        if(parentScope.getParent() != null){
+//            if (!parentScope.getParent().getId().contains("select_core")){
+//                parentScope = Main.symbolTable.getScopes().get(Main.symbolTable.getScopes().size() - 2);
+//            }
+//        }
 
         currentScope.setParent(parentScope);
         varInit.setCurrentScope(currentScope);
 
         Type type = new Type();
+        type.setTypeNum("var");
         // end
 
         if (ctx.K_VAR() != null) {
@@ -2446,10 +2585,14 @@ public class BaseVisitor extends SQLBaseVisitor {
             }
 
             if (expr.getSql_stmt_list() != null){
-
-                String typeName = varName+"_"+expr.getSql_stmt_list().get(0).getFactoredSelectStmt().getSelectCore().getTableOrSubQueries().get(0).getTableName(); ;
-
+                String typeName = varName+"_"+expr.getSql_stmt_list().get(0).getFactoredSelectStmt().getSelectCore().getTableOrSubQueries().get(0).getTableName();
+                currentScope.setId(typeName);
                 type.setName(typeName);
+
+                SelectCore selectCore = expr.getSql_stmt_list().get(0).getFactoredSelectStmt().getSelectCore();
+                Scope selectSCope = selectCore.getScope();
+                selectSCope.setParent(currentScope);
+
             }
 
 

@@ -1,5 +1,6 @@
 package Java.AST.QueryStmt.SelectStmt;
 
+import CodeGeneration.WhereCondition;
 import Java.AST.Expr.Expr;
 import Java.AST.Node;
 import Java.AST.QueryStmt.JoinClause;
@@ -25,6 +26,16 @@ public class SelectCore extends Node {
     private String VALUES;
     private String Where;
     private Scope scope;
+
+    private WhereCondition condition;
+
+    public WhereCondition getWhereCondition() {
+        return condition;
+    }
+
+    public void setCondition(WhereCondition condition) {
+        this.condition = condition;
+    }
 
     public GroupBy getGroupBy() {
         return groupBy;

@@ -41,7 +41,7 @@ public class BaseASTVisitor implements ASTVisitor {
     private Scope currentScope;
     private String varName;
     private String varType;
-
+    private String path;
     @Override
     public void visit(Parse p) {
 //        System.out.println("ast parse ");
@@ -49,18 +49,44 @@ public class BaseASTVisitor implements ASTVisitor {
             visit(sqlStmt);
         }
 
-
+        path = "C:\\Users\\Bcc\\Desktop\\CompilerTest\\src\\";
 
         FileOperations operations = new FileOperations();
         for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
-            File file = new File("C:\\Users\\Bcc\\Desktop\\CompilerTest\\src\\"+Main.symbolTable.getDeclaredTypes().get(i).getName()+".java");
+            File file = new File(path+Main.symbolTable.getDeclaredTypes().get(i).getName()+".java");
 
             try {
                 if(file.createNewFile()){
+                    if(Main.symbolTable.getDeclaredTypes().get(i).getColumns().size() > 0){
+
+                    operations.writeFile(file ,Main.symbolTable.getDeclaredTypes().get(i).getColumns() , Main.symbolTable.getDeclaredTypes().get(i));
+                    }else{
+
+                        for (int i2 = 0; i2 < Main.symbolTable.getDeclaredTypes().size(); i2++) {
+                            if (Main.symbolTable.getDeclaredTypes().get(i).getName().contains(Main.symbolTable.getDeclaredTypes().get(i2).getName())){
+                                operations.writeFile(file ,Main.symbolTable.getDeclaredTypes().get(i2).getColumns() , Main.symbolTable.getDeclaredTypes().get(i));
+                                break;
+                            }
+                        }
+
+                    }
 //                    System.out.println("new file name "+Main.symbolTable.getDeclaredTypes().get(i).getName());
-                    operations.writeFile(file ,Main.symbolTable.getDeclaredTypes().get(i).getColumns() , Main.symbolTable.getDeclaredTypes().get(i));
                 }else {
-                    operations.writeFile(file ,Main.symbolTable.getDeclaredTypes().get(i).getColumns() , Main.symbolTable.getDeclaredTypes().get(i));
+
+                    if(Main.symbolTable.getDeclaredTypes().get(i).getColumns().size() > 0){
+
+                        operations.writeFile(file ,Main.symbolTable.getDeclaredTypes().get(i).getColumns() , Main.symbolTable.getDeclaredTypes().get(i));
+                    }else{
+
+                        for (int i2 = 0; i2 < Main.symbolTable.getDeclaredTypes().size(); i2++) {
+                            if (Main.symbolTable.getDeclaredTypes().get(i).getName().contains(Main.symbolTable.getDeclaredTypes().get(i2).getName())){
+                                operations.writeFile(file ,Main.symbolTable.getDeclaredTypes().get(i2).getColumns() , Main.symbolTable.getDeclaredTypes().get(i));
+                            break;
+                            }
+                        }
+
+                    }
+//                    operations.writeFile(file ,Main.symbolTable.getDeclaredTypes().get(i).getColumns() , Main.symbolTable.getDeclaredTypes().get(i));
 //                    System.out.println("already exsiest file name "+Main.symbolTable.getDeclaredTypes().get(i).getName());
                 }
             } catch (IOException e) {
@@ -81,10 +107,19 @@ public class BaseASTVisitor implements ASTVisitor {
 
             }
         }
-        if(functionDeclaration != null){
-            for (int i = 0; i < Main.symbolTable.getDeclaredTypes().size(); i++) {
-                File file = new File("C:\\Users\\Bcc\\Desktop\\CompilerTest\\src\\Main.java");
 
+
+//        if(Main.selectCore != null){
+//            if(Main.selectCore.getWhereCondition() != null){
+//
+//                System.out.println("center "+Main.selectCore.getWhereCondition().getCondition().getOperator()  );
+//                System.out.println("left "+Main.selectCore.getWhereCondition().getCondition().getLeftCon().getOperator());
+//                System.out.println("right "+Main.selectCore.getWhereCondition().getCondition().getRightCon().getOperator()+"val"+Main.selectCore.getWhereCondition().getCondition().getRightCon().getRightCon().getLiteralValue().getNumericalValue());
+//            }
+//        }
+
+        if(functionDeclaration != null){
+                File file = new File(path+"\\Main.java");
                 try {
                     if(file.createNewFile()){
                         operations.writeMainFile(file );
@@ -94,7 +129,6 @@ public class BaseASTVisitor implements ASTVisitor {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            }
         }
         
         
@@ -119,7 +153,7 @@ public class BaseASTVisitor implements ASTVisitor {
     private void printSelectCore(SelectCore selectCore) {
 
         if(selectCore != null){
-            Main.selectCore = selectCore;
+
 //            System.out.println("selectCore");
         }
         if (selectCore.getJoinClause() != null) {
@@ -870,7 +904,7 @@ public class BaseASTVisitor implements ASTVisitor {
 //                   System.err.println(tableName+ " not found "  );
                 }else {
                     if (!check.get()) {
-                        System.err.println("Error In Line :" + expr.getLine() +" "+expr.getColumnName() + " undefined Column in " + tableName );
+//                        System.err.println("Error In Line :" + expr.getLine() +" "+expr.getColumnName() + " undefined Column in " + tableName );
 
                     }
                 }
@@ -904,7 +938,7 @@ public class BaseASTVisitor implements ASTVisitor {
                 System.err.println("Error in line "+Line +" "+table+ " not found "  );
             }else {
                 if (!check.get()) {
-                    System.err.println( "Error in line "+Line +" "+columnName + " undefined Column in " + table );
+//                    System.err.println( "Error in line "+Line +" "+columnName + " undefined Column in " + table );
 
                 }
             }
@@ -1518,7 +1552,7 @@ public class BaseASTVisitor implements ASTVisitor {
 
     private void printFunctionDeclarations(FunctionDeclaration functionDeclarations) {
 //        System.out.println("--------------------------------------");
-        System.out.println("ast functionDeclarations");
+//        System.out.println("ast functionDeclarations");
         if(functionDeclarations != null){
             functionDeclaration = functionDeclarations;
         }
@@ -2292,6 +2326,7 @@ public class BaseASTVisitor implements ASTVisitor {
         if (factoredSelectStmt.getSelectCore() != null) {
 
             printSelectCore(factoredSelectStmt.getSelectCore());
+
 
         }
         if (factoredSelectStmt.getOrder() != null) {
